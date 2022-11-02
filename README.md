@@ -1,2 +1,2 @@
-# mensable
-Mensable: A spaced-repetition learning app.
+# mensable.com
+A spaced-repetition learning app.
