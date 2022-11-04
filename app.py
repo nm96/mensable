@@ -1,13 +1,25 @@
 from flask import Flask, flash, render_template, request, session
 from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
 
 # Configure application
 app = Flask(__name__)
-
-# Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.sqlite3"
+
+# Set up database
+db = SQLAlchemy(app)
 
 Session(app)
+
+class users(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=true)
+    name = db.Coumn(db.String(100))
+    email = db.Coumn(db.String(100))
+
+    def __init__(name, email):
+        self.name = name
+        self.email = email
 
 @app.route("/")
 def home():
