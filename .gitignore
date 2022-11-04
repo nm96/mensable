@@ -1,1 +1,4 @@
 __pycache__
+venv
+instance
+templates/empty.html
