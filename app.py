@@ -1,8 +1,9 @@
 from flask import Flask, flash, render_template, request, session, redirect
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
-from functools import wraps
 
+from models import users, db
+from helpers import login_required
 
 # Configure application
 app = Flask(__name__)
@@ -14,36 +15,26 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Set up database
-db = SQLAlchemy(app)
-
-
-class users(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-
-    def __init__(self, name):
-        self.name = name
+db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
-def login_required(f):
-    """
-    Decorate routes to require login.
 
-    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
-    """
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("user") is None:
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated_function
+@app.after_request
+def after_request(response):
+    """Ensure responses aren't cached"""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
 
 @app.route("/")
 @login_required
 def home():
     return render_template("home.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
