@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session
+from flask import Flask, flash, render_template, request, session
 from flask_session import Session
 
 # Configure application
@@ -10,5 +10,13 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 Session(app)
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def home():
+    return render_template("home.html")
+
+@app.after_request
+def after_request(response):
+    """Ensure responses aren't cached"""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
