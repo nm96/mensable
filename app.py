@@ -49,6 +49,7 @@ def login():
             flash(f"Error: user {username} not in database, please register.")
             return redirect("/register")
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register a new user"""
@@ -69,7 +70,6 @@ def register():
             db.session.commit()
             flash(f"welcome to mensable, {username}")
             return redirect("/")
-
 
 
 @app.route("/logout")
