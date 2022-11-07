@@ -37,11 +37,10 @@ def login():
     elif request.method == "POST":
         # Record username from login form
         username = request.form["username"]
-        # Log current username in session
-        session["user"] = username
         # Check if username exists in database
         found_user = User.query.filter_by(name=username).first()
         if found_user:
+            session["user_id"] = found_user["id"]
             flash(f"hello again, {username}")
             return redirect("/")
         else:
@@ -83,7 +82,13 @@ def logout():
 @login_required
 def create_table():
     """Create a new word table to learn"""
-    pass
+    if request.method == "GET":
+        return render_template("create_table.html")
+    elif request.method == "POST":
+        table_name = request.form["table_name"]
+        table = Table(table_name)
+        return render_template("create_table.html")
+    # TODO: Finish this function properly, write associated html template
 
 
 @app.after_request
