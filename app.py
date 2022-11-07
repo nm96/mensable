@@ -91,6 +91,17 @@ def create_table():
         return redirect("/edit_table", table)
 
 
+@app.route("/edit_table")
+@login_required
+def edit_table():
+    """Edit an existing word table"""
+    if request.method == "GET":
+        return render_template("edit_table.html")
+    elif request.method == "POST":
+        pass
+    
+
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""

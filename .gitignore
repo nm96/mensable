@@ -3,4 +3,3 @@ venv/
 instance/
 flask_session/
 templates/empty.html
-*.db
