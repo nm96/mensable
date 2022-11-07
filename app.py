@@ -1,6 +1,7 @@
 from flask import Flask, flash, render_template, request, session, redirect
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import users, db
 from helpers import login_required
@@ -41,16 +42,34 @@ def login():
         # Check if username exists in database
         found_user = users.query.filter_by(name=username).first()
         if found_user:
-            flash(f"hello again, {user}")
+            flash(f"hello again, {username}")
             return redirect("/")
+        else:
+            # If username is not in database, raise error and redirect
+            flash(f"Error: user {username} not in database, please register.")
+            return redirect("/register")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register a new user"""
+    if request.method == "GET":
+        return render_template("register.html")
+    elif request.method == "POST":
+        username = request.form["username"]
+        # Check if username exists in database
+        found_user = users.query.filter_by(name=username).first()
+        if found_user:
+            flash(f"User {username} already registered!")
+            return redirect("/login")
         else:
             # If username is not in database, create new entry in users table
             # i.e. new 'users' object
-            user_entry = users(user)
+            user_entry = users(username)
             db.session.add(user_entry)
             db.session.commit()
-            flash(f"welcome to mensable, {session['user']}")
+            flash(f"welcome to mensable, {username}")
             return redirect("/")
+
 
 
 @app.route("/logout")
