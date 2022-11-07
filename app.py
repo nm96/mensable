@@ -7,7 +7,6 @@ from helpers import login_required
 
 # Configure application
 app = Flask(__name__)
-app.secret_key = "abcdefg"
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 app.config["SQLALCHEMY_ECHO"] = True
@@ -34,6 +33,7 @@ def after_request(response):
 @app.route("/")
 @login_required
 def home():
+    flash(f"welcome, {session['user']}")
     return render_template("home.html")
 
 
@@ -53,6 +53,5 @@ def login():
             user_entry = users(user)
             db.session.add(user_entry)
             db.session.commit()
-            flash(f"welcome, {user}")
             return redirect("/")
 
