@@ -18,6 +18,9 @@ class Table(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(100))
     words = db.relationship('WordPair', backref='table', lazy=True)
+
+    def __init__(self, name):
+        self.name = name
     
 
 class WordPair(db.Model):

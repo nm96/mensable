@@ -87,8 +87,8 @@ def create_table():
     elif request.method == "POST":
         table_name = request.form["table_name"]
         table = Table(table_name)
-        return render_template("create_table.html")
-    # TODO: Finish this function properly, write associated html template
+        table.creator_id = session["user_id"]
+        return redirect("/edit_table", table)
 
 
 @app.after_request
