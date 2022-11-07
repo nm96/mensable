@@ -9,3 +9,7 @@ class users(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+
+class Words(db.Model):
+    _id = db.Column("id", db.Integer, primary_key=True)

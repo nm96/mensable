@@ -3,7 +3,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import users, db
+from models import User, db
 from helpers import login_required
 
 # Configure application
@@ -40,7 +40,7 @@ def login():
         # Log current username in session
         session["user"] = username
         # Check if username exists in database
-        found_user = users.query.filter_by(name=username).first()
+        found_user = User.query.filter_by(name=username).first()
         if found_user:
             flash(f"hello again, {username}")
             return redirect("/")
@@ -58,14 +58,14 @@ def register():
     elif request.method == "POST":
         username = request.form["username"]
         # Check if username exists in database
-        found_user = users.query.filter_by(name=username).first()
+        found_user = User.query.filter_by(name=username).first()
         if found_user:
             flash(f"User {username} already registered!")
             return redirect("/login")
         else:
             # If username is not in database, create new entry in users table
-            # i.e. new 'users' object
-            user_entry = users(username)
+            # i.e. new 'User' object
+            user_entry = User(username)
             db.session.add(user_entry)
             db.session.commit()
             flash(f"welcome to mensable, {username}")
