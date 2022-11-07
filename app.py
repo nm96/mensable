@@ -3,7 +3,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import User, db
+from models import *
 from helpers import login_required
 
 # Configure application
@@ -78,7 +78,7 @@ def logout():
     return redirect("/")
 
 
-@app.route("/create_table")
+@app.route("/create_table", methods=["GET", "POST"])
 @login_required
 def create_table():
     """Create a new word table to learn"""
@@ -88,18 +88,25 @@ def create_table():
         table_name = request.form["table_name"]
         table = Table(table_name)
         table.creator_id = session["user_id"]
-        return redirect("/edit_table", table)
+        db.session.add(table)
+        db.session.commit()
+        return redirect("/edit_table/" + table_name)
 
 
-@app.route("/edit_table")
+@app.route("/edit_table/<table_name>", methods=["GET", "POST"])
 @login_required
-def edit_table():
+def edit_table(table_name):
     """Edit an existing word table"""
+    table = Table.query.filter_by(name=table_name).first()
     if request.method == "GET":
-        return render_template("edit_table.html")
+        return render_template("edit_table.html", table_name=table_name)
     elif request.method == "POST":
-        pass
-    
+        word_pair = WordPair(request.form["foreignWord"],
+                request.form["translation"])
+        word_pair.table_id = table.id
+        db.session.add(word_pair)
+        db.session.commit()
+        return redirect("/edit_table/" + table_name)
 
 
 @app.after_request

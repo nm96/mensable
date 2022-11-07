@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-    <form action="/create_table" method="post">
+<form action="/edit_table/{{ table_name }}" method="post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="foreignWord" name="foreignWord" placeholder="Word" type="text">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="translation" name="translation" placeholder="Translation" type="text">
