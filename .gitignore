@@ -1,5 +1,6 @@
-__pycache__
-venv
-instance
-templates/empty.html
+__pycache__/
+venv/
+instance/
 flask_session/
+templates/empty.html
+*.db

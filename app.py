@@ -9,7 +9,7 @@ from helpers import login_required
 # Configure application
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -40,7 +40,7 @@ def login():
         # Check if username exists in database
         found_user = User.query.filter_by(name=username).first()
         if found_user:
-            session["user_id"] = found_user["id"]
+            session["user_id"] = found_user.id
             flash(f"hello again, {username}")
             return redirect("/")
         else:
