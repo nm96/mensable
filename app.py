@@ -79,6 +79,13 @@ def logout():
     return redirect("/")
 
 
+@app.route("/create_table")
+@login_required
+def create_table():
+    """Create a new word table to learn"""
+    pass
+
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
