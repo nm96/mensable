@@ -64,15 +64,15 @@ def register():
             return redirect("/register")
         found_user = User.query.filter_by(name=username).first()
         if found_user:
-            flash(f"User {username} already registered!")
+            flash(f"Username taken.")
             return redirect("/register")
         else:
             # If username is not in database, create new entry in users table
             # i.e. new 'User' object
-            user_entry = User(username)
-            db.session.add(user_entry)
+            user = User(username)
+            db.session.add(user)
             db.session.commit()
-            session["user_id"] = user_entry.id
+            session["user_id"] = user.id
             return redirect("/")
 
 
