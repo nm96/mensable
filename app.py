@@ -25,7 +25,8 @@ with app.app_context():
 @login_required
 def home():
     """Render homepage"""
-    return render_template("home.html")
+    user = User.query.filter_by(id=session["user_id"]).first()
+    return render_template("home.html", username=user.name)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -71,6 +72,7 @@ def register():
             user_entry = User(username)
             db.session.add(user_entry)
             db.session.commit()
+            session["user_id"] = user_entry.id
             return redirect("/")
 
 
