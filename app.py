@@ -37,6 +37,9 @@ def login():
     elif request.method == "POST":
         # Record username from login form
         username = request.form["username"]
+        if not username:
+            flash("Please enter a username.")
+            return redirect("/login")
         # Check if username exists in database
         found_user = User.query.filter_by(name=username).first()
         if found_user:
@@ -56,11 +59,13 @@ def register():
         return render_template("register.html")
     elif request.method == "POST":
         username = request.form["username"]
-        # Check if username exists in database
+        if not username:
+            flash("Please enter a username.")
+            return redirect("/register")
         found_user = User.query.filter_by(name=username).first()
         if found_user:
             flash(f"User {username} already registered!")
-            return redirect("/login")
+            return redirect("/register")
         else:
             # If username is not in database, create new entry in users table
             # i.e. new 'User' object
@@ -86,6 +91,8 @@ def create_table():
         return render_template("create_table.html")
     elif request.method == "POST":
         table_name = request.form["table_name"]
+        if not table_name:
+            flash("Please provide a table name.")
         table = Table(table_name)
         table.creator_id = session["user_id"]
         db.session.add(table)
@@ -103,18 +110,24 @@ def edit_table(table_name):
     elif request.method == "POST":
         word_pair = WordPair(request.form["foreignWord"],
                 request.form["translation"])
+        if not word_pair.foreignWord or not word_pair.translation:
+            flash("please enter both a word and a translation")
+            return redirect("/edit_table/" + table_name)
         word_pair.table_id = table.id
         db.session.add(word_pair)
         db.session.commit()
         return redirect("/edit_table/" + table_name)
 
+# The code below is taken from the CS50 finance exercise - need to figure out
+# what it does, have disabled it for now because it seems to interfere with the
+# flash message functionality.
 
-@app.after_request
-def after_request(response):
-    """Ensure responses aren't cached"""
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
+#@app.after_request
+#def after_request(response):
+#    """Ensure responses aren't cached"""
+#    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#    response.headers["Expires"] = 0
+#    response.headers["Pragma"] = "no-cache"
+#    return response
 
 
