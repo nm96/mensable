@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block body %}
+	<div class="container-fluid">
+		<h2>
+			Tables
+		</h2>
+	</div>	
+	<table class="table">
+		{% for table in tables %}
+		<tr>
+			<td class="text-start"><a href="/view_table/{{ table.name }}"> {{ table.name | capitalize }}</a></td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock %}
