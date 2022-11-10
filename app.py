@@ -94,6 +94,10 @@ def create_table():
         if not table_name.isalnum():
             flash("Table name can only contain alphanumeric characters.")
             return redirect("/create_table")
+        existing_table = Table.query.filter_by(name=table_name).first()
+        if existing_table:
+            flash(f"Table {table_name} already exists.")
+            return redirect("/create_table")
         table = Table(table_name)
         table.creator_id = session["user_id"]
         db.session.add(table)
@@ -141,6 +145,14 @@ def view_table(table_name):
         return redirect("/edit_table/" + table_name)
     return render_template("view_table.html", word_list=word_list,
             table_name=table_name)
+
+
+@app.route("/tables")
+@login_required
+def tables():
+    """List existing tables"""
+    tables = Table.query.all()
+    return render_template("tables.html", tables=tables)
 
 
 # The code below is taken from the CS50 finance exercise - need to figure out
