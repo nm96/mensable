@@ -2,11 +2,15 @@
 
 {% block body %}
 <form action="/edit_table/{{ table_name }}" method="post">
+		<div class="container-fluid">
+			<h3>Editing {{ table_name | capitalize }}</h3>
+		</div>
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="foreignWord" name="foreignWord" placeholder="Word" type="text" required>
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="translation" name="translation" placeholder="Translation" type="text" required>
+            <input autocomplete="off" autofocus class="form-control w-auto" id="foreignWord" name="foreignWord" placeholder="Word" type="text" required>
+            <input autocomplete="off" autofocus class="form-control w-auto" id="translation" name="translation" placeholder="Translation" type="text" required>
 			<br>
         	<button class="btn btn-primary" type="submit">Add</button>
+			<a class="btn btn-info" href="/view_table/{{ table_name }}" role="button">View Table</a>
         </div>
     </form>
 {% endblock %}

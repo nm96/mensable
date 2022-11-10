@@ -124,6 +124,23 @@ def edit_table(table_name):
         db.session.commit()
         return redirect("/edit_table/" + table_name)
 
+
+@app.route("/view_table/<table_name>", methods=["GET"])
+@login_required
+def view_table(table_name):
+    """View an existing word table"""
+    table = Table.query.filter_by(name=table_name).first()
+    if not table:
+        flash(f"Table {table_name} does not exist")
+        return redirect("/")
+    word_list = WordPair.query.filter_by(table_id=table.id)
+    if not word_list:
+        flash(f"Table {table_name} is empty, try editing it here")
+        return redirect("/edit_table/" + table_name)
+    return render_template("view_table.html", word_list=word_list,
+            table_name=table_name)
+
+
 # The code below is taken from the CS50 finance exercise - need to figure out
 # what it does, have disabled it for now because it seems to interfere with the
 # flash message functionality.

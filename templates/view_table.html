@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block body %}
+	<div class="container-fluid">
+		<h2>{{ table_name | capitalize }}</h2>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th class="text-start">Word</th>
+				<th class="text-start">Translation</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for word_pair in word_list %}		
+			<tr>
+				<td class="text-start">{{ word_pair.foreignWord }}</td>
+				<td class="text-start">{{ word_pair.translation }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>	
+{% endblock %}
