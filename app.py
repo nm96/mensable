@@ -44,7 +44,6 @@ def login():
         found_user = User.query.filter_by(name=username).first()
         if found_user:
             session["user_id"] = found_user.id
-            flash(f"hello again, {username}")
             return redirect("/")
         else:
             # If username is not in database, raise error and redirect
@@ -59,8 +58,8 @@ def register():
         return render_template("register.html")
     elif request.method == "POST":
         username = request.form["username"]
-        if not username:
-            flash("Please enter a username.")
+        if not username.isalnum():
+            flash("Username can only contain alphanumeric characters.")
             return redirect("/register")
         found_user = User.query.filter_by(name=username).first()
         if found_user:
@@ -72,7 +71,6 @@ def register():
             user_entry = User(username)
             db.session.add(user_entry)
             db.session.commit()
-            flash(f"welcome to mensable, {username}")
             return redirect("/")
 
 
@@ -91,8 +89,9 @@ def create_table():
         return render_template("create_table.html")
     elif request.method == "POST":
         table_name = request.form["table_name"]
-        if not table_name:
-            flash("Please provide a table name.")
+        if not table_name.isalnum():
+            flash("Table name can only contain alphanumeric characters.")
+            return redirect("/create_table")
         table = Table(table_name)
         table.creator_id = session["user_id"]
         db.session.add(table)
