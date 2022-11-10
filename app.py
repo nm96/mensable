@@ -139,12 +139,11 @@ def view_table(table_name):
     if not table:
         flash(f"Table {table_name} does not exist")
         return redirect("/")
-    word_list = WordPair.query.filter_by(table_id=table.id)
-    if not word_list:
+    if not table.words:
         flash(f"Table {table_name} is empty, try editing it here")
         return redirect("/edit_table/" + table_name)
-    return render_template("view_table.html", word_list=word_list,
-            table_name=table_name)
+    return render_template("view_table.html", word_list=table.words,
+            table_name=table.name)
 
 
 @app.route("/tables")
