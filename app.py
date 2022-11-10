@@ -107,11 +107,18 @@ def edit_table(table_name):
     if request.method == "GET":
         return render_template("edit_table.html", table_name=table_name)
     elif request.method == "POST":
-        word_pair = WordPair(request.form["foreignWord"],
-                request.form["translation"])
-        if not word_pair.foreignWord or not word_pair.translation:
+        # Get word and translation from input form.
+        foreignWord = request.form["foreignWord"]
+        translation = request.form["translation"]
+        # Tidy them up by removing spaces at start and end.
+        foreignWord = foreignWord.strip()
+        translation = translation.strip()
+        # Check if words are (still) non-empty
+        if not foreignWord or not translation:
             flash("please enter both a word and a translation")
             return redirect("/edit_table/" + table_name)
+        # Enter word pair into database.
+        word_pair = WordPair(foreignWord, translation)
         word_pair.table_id = table.id
         db.session.add(word_pair)
         db.session.commit()
