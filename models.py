@@ -17,11 +17,9 @@ class User(db.Model):
 # Auxiliary table for tracking the many-to-many relationship between tables and
 # word pairs.
 words_in_tables = db.Table('words_in_tables',
-        db.Column('word_pair_id', db.Integer, db.ForeignKey('word_pair.id'),
-            primary_key=True),
-        db.Column('table_id', db.Integer, db.ForeignKey('table.id'),
-            primary_key=True)
-        )
+        db.Column('word_pair_id', db.Integer, db.ForeignKey('word_pair.id')),
+        db.Column('table_id', db.Integer, db.ForeignKey('table.id')))
+        
 
 
 class Table(db.Model):
@@ -30,7 +28,7 @@ class Table(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(100), unique=True)
     words = db.relationship('WordPair', secondary=words_in_tables,
-            lazy='subquery', backref=db.backref('tables', lazy=True))
+            backref='contained_in')
 
     def __init__(self, name):
         self.name = name

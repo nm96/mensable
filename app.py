@@ -162,6 +162,7 @@ def edit_table(table_name):
         #word_pair.table_id = table.id
         db.session.add(word_pair)
         #TODO: Add (word_pair.id, table.id) to the auxiliary words_in_tables table.
+        table.words.append(word_pair)
         db.session.commit()
         return redirect("/edit_table/" + table_name)
 
