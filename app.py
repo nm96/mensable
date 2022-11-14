@@ -120,13 +120,16 @@ def create_table():
 
     elif request.method == "POST":
         table_name = request.form["table_name"]
+
         if not table_name.isalnum():
             flash("Table name can only contain alphanumeric characters.")
             return redirect("/create_table")
         existing_table = Table.query.filter_by(name=table_name).first()
+
         if existing_table:
             flash(f"Table {table_name} already exists.")
             return redirect("/create_table")
+
         table = Table(table_name)
         table.creator_id = session["user_id"]
         db.session.add(table)
@@ -156,8 +159,9 @@ def edit_table(table_name):
             return redirect("/edit_table/" + table_name)
         # Enter word pair into database.
         word_pair = WordPair(foreignWord, translation)
-        word_pair.table_id = table.id
+        #word_pair.table_id = table.id
         db.session.add(word_pair)
+        #TODO: Add (word_pair.id, table.id) to the auxiliary words_in_tables table.
         db.session.commit()
         return redirect("/edit_table/" + table_name)
 
