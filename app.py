@@ -26,6 +26,8 @@ with app.app_context():
 def home():
     """Render homepage"""
     user = User.query.filter_by(id=session["user_id"]).first()
+    if not user:
+        return redirect("/login")
     return render_template("home.html", username=user.name)
 
 
@@ -159,9 +161,7 @@ def edit_table(table_name):
             return redirect("/edit_table/" + table_name)
         # Enter word pair into database.
         word_pair = WordPair(foreignWord, translation)
-        #word_pair.table_id = table.id
         db.session.add(word_pair)
-        #TODO: Add (word_pair.id, table.id) to the auxiliary words_in_tables table.
         table.words.append(word_pair)
         db.session.commit()
         return redirect("/edit_table/" + table_name)

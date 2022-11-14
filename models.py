@@ -37,7 +37,6 @@ class Table(db.Model):
 class WordPair(db.Model):
     """Table containing word-translation pairs to learn"""
     td = db.Column("id", db.Integer, primary_key=True)
-    #table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
     foreignWord = db.Column(db.String(100))
     translation = db.Column(db.String(100))
 
