@@ -2,7 +2,7 @@
 
 {% block body %}
 	<div class="container-fluid">
-		<h2>{{ table_name | capitalize }}</h2>
+		<h2>{{ table.name | capitalize }}: created by {{ table.creator.name }}</h2>
 	</div>
 	<table class="table">
 		<thead>
@@ -12,7 +12,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for word_pair in word_list %}		
+			{% for word_pair in table.words %}		
 			<tr>
 				<td class="text-start">{{ word_pair.foreignWord }}</td>
 				<td class="text-start">{{ word_pair.translation }}</td>

@@ -181,8 +181,7 @@ def view_table(table_name):
         flash(f"Table {table_name} is empty, try editing it here")
         return redirect("/edit_table/" + table_name)
 
-    return render_template("view_table.html", word_list=table.words,
-            table_name=table.name)
+    return render_template("view_table.html", table=table)
 
 
 @app.route("/tables")

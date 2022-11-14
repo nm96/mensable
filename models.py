@@ -21,7 +21,6 @@ words_in_tables = db.Table('words_in_tables',
         db.Column('table_id', db.Integer, db.ForeignKey('table.id')))
         
 
-
 class Table(db.Model):
     """Table to track tables (!) of word-translation pairs to learn"""
     id = db.Column("id", db.Integer, primary_key=True)
