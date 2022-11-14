@@ -6,10 +6,12 @@ class User(db.Model):
     """Table containing information about users"""
     id = db.Column("id", db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
+    password_hash = db.Column(db.String(100))
     tables = db.relationship('Table', backref='creator', lazy=True)
 
-    def __init__(self, name):
+    def __init__(self, name, password_hash):
         self.name = name
+        self.password_hash = password_hash
 
 
 class Table(db.Model):
