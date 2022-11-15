@@ -2,7 +2,8 @@
 
 {% block body %}
 	<div class="container-fluid">
-		<h2>{{ table.name | capitalize }}: created by {{ table.creator.name }}</h2>
+		<h2>{{ table.name | capitalize }}</h2>
+		<p>Created by {{ table.creator.name }} on {{ table.created }}</p>
 	</div>
 	<table class="table">
 		<thead>

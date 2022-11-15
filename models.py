@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import date
 
 db = SQLAlchemy()
 
@@ -24,10 +25,11 @@ words_in_tables = db.Table('words_in_tables',
 class Table(db.Model):
     """Table to track tables (!) of word-translation pairs to learn"""
     id = db.Column("id", db.Integer, primary_key=True)
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(100), unique=True)
     words = db.relationship('WordPair', secondary=words_in_tables,
             backref='contained_in')
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created = db.Column(db.String(20), default=date.today)
 
     def __init__(self, name):
         self.name = name
