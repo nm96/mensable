@@ -4,7 +4,7 @@ from datetime import date
 db = SQLAlchemy()
 
 class User(db.Model):
-    """Table containing information about users"""
+    """Basic information about user accounts"""
     id = db.Column("id", db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     password_hash = db.Column(db.String(100))
@@ -15,31 +15,46 @@ class User(db.Model):
         self.password_hash = password_hash
 
 
-# Auxiliary table for tracking the many-to-many relationship between tables and
-# word pairs.
-words_in_tables = db.Table('words_in_tables',
+class Language(db.Model):
+    """Top-level category for word tables. Could be an actual language or
+    something like 'IT acronyms' or 'Tree species'."""
+    id = db.Column("id", db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True)
+    tables = db.relationship('Table', backref='language', lazy=True)
+    words = db.relationship('WordPair', backref='language', lazy=True)
+
+    def __init__(self, name):
+        self.name = name
+
+
+# Helper table for documenting Table/WordPair relationships
+table_word_pair = db.Table('table_word_pair',
         db.Column('word_pair_id', db.Integer, db.ForeignKey('word_pair.id')),
         db.Column('table_id', db.Integer, db.ForeignKey('table.id')))
         
 
 class Table(db.Model):
-    """Table to track tables (!) of word-translation pairs to learn"""
+    """The fundamental objects in mensABLE - basically they are lists of
+    word-translation pairs to learn."""
     id = db.Column("id", db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    words = db.relationship('WordPair', secondary=words_in_tables,
+    words = db.relationship('WordPair', secondary=table_word_pair,
             backref='contained_in')
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     created = db.Column(db.String(20), default=date.today)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
 
     def __init__(self, name):
         self.name = name
     
 
 class WordPair(db.Model):
-    """Table containing word-translation pairs to learn"""
+    """A word in a foreign language/category and its translation/english
+    definition."""
     td = db.Column("id", db.Integer, primary_key=True)
     foreignWord = db.Column(db.String(100))
     translation = db.Column(db.String(100))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
 
     def __init__(self, foreignWord, translation):
         self.foreignWord = foreignWord

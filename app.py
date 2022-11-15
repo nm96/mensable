@@ -112,41 +112,70 @@ def logout():
     return redirect("/")
 
 
-@app.route("/create_table", methods=["GET", "POST"])
+@app.route("/create_language", methods=["GET", "POST"])
 @login_required
-def create_table():
-    """Create a new word table to learn"""
+def create_language():
     
     if request.method == "GET":
-        return render_template("create_table.html")
+        return render_template("create_language.html")
+
+    elif request.method == "POST":
+        language_name = request.form["language_name"]
+
+        if not language_name.isalnum():
+            flash("Language name can only contain alphanumeric characters.")
+            return redirect("/create_language")
+
+        existing_language = Language.query.filter_by(name=language_name).first()
+        if existing_language:
+            flash(f"Language {language_name} already exists.")
+            return redirect("/create_language")
+
+        language = Language(language_name)
+        db.session.add(language)
+        db.session.commit()
+        return redirect("/create_table/" + language_name)
+
+
+@app.route("/create_table/<language_name>", methods=["GET", "POST"])
+@login_required
+def create_table(language_name):
+    """Create a new word table to learn"""
+
+    language = Language.query.filter_by(name=language_name).first()
+    
+    if request.method == "GET":
+        return render_template("create_table.html", language=language)
 
     elif request.method == "POST":
         table_name = request.form["table_name"]
 
         if not table_name.isalnum():
             flash("Table name can only contain alphanumeric characters.")
-            return redirect("/create_table")
-        existing_table = Table.query.filter_by(name=table_name).first()
+            return redirect(f"/create_table/{language_name}")
 
+        existing_table = Table.query.filter_by(name=table_name).first()
         if existing_table:
             flash(f"Table {table_name} already exists.")
-            return redirect("/create_table")
+            return redirect(f"/create_table/{language_name}")
 
         table = Table(table_name)
         table.creator_id = session["user_id"]
+        table.language_id = language.id
         db.session.add(table)
         db.session.commit()
-        return redirect("/edit_table/" + table_name)
+        return redirect(f"/edit_table/{language_name}/{table_name}")
 
 
-@app.route("/edit_table/<table_name>", methods=["GET", "POST"])
+@app.route("/edit_table/<language_name>/<table_name>", methods=["GET", "POST"])
 @login_required
-def edit_table(table_name):
+def edit_table(language_name, table_name):
     """Edit an existing word table"""
     table = Table.query.filter_by(name=table_name).first()
+    language = Language.query.filter_by(name=language_name).first()
 
     if request.method == "GET":
-        return render_template("edit_table.html", table_name=table_name)
+        return render_template("edit_table.html", language=language, table=table)
 
     elif request.method == "POST":
         # Get word and translation from input form.
@@ -158,18 +187,19 @@ def edit_table(table_name):
         # Check if words are (still) non-empty
         if not foreignWord or not translation:
             flash("please enter both a word and a translation")
-            return redirect("/edit_table/" + table_name)
+            return redirect(f"/edit_table/{language_name}/{table_name}")
         # Enter word pair into database.
         word_pair = WordPair(foreignWord, translation)
+        word_pair.language_id = language.id
         db.session.add(word_pair)
         table.words.append(word_pair)
         db.session.commit()
-        return redirect("/edit_table/" + table_name)
+        return redirect(f"/edit_table/{language_name}/{table_name}")
 
 
-@app.route("/view_table/<table_name>", methods=["GET"])
+@app.route("/view_table/<language_name>/<table_name>", methods=["GET"])
 @login_required
-def view_table(table_name):
+def view_table(language_name, table_name):
     """View an existing word table"""
     table = Table.query.filter_by(name=table_name).first()
 
@@ -179,17 +209,25 @@ def view_table(table_name):
 
     if not table.words:
         flash(f"Table {table_name} is empty, try editing it here")
-        return redirect("/edit_table/" + table_name)
+        return redirect(f"/edit_table/{language_name}/{table_name}")
 
     return render_template("view_table.html", table=table)
 
 
 @app.route("/tables")
+@app.route("/tables/<language_name>")
 @login_required
-def tables():
-    """List existing tables"""
-    tables = Table.query.all()
+def tables(language_name=None):
+    """List all tables, or optionally all tables in a given language"""
+    if not language_name:
+        tables = Table.query.all()
+    else:
+        language = Language.query.filter_by(name=language_name).first()
+        tables = Table.query.filter_by(language_id=language.id)
     return render_template("tables.html", tables=tables)
+
+
+
 
 
 # The code below is taken from the CS50 finance exercise - need to figure out

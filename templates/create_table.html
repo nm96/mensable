@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-    <form action="/create_table" method="post">
+    <form action="/create_table/{{ language.name }}" method="post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control w-auto" id="table_name" name="table_name" placeholder="Table name" type="text" required>
 			<br>
