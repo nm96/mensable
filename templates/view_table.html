@@ -4,6 +4,7 @@
 	<div class="container-fluid">
 		<h2>{{ table.name | capitalize }}</h2>
 		<p>Created by {{ table.creator.name }} on {{ table.created }}</p>
+		<a class="btn btn-info" href="/edit_table/{{ table.language.name }}/{{ table.name }}" role="button">Edit Table</a>
 	</div>
 	<table class="table">
 		<thead>
