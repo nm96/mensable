@@ -6,20 +6,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from models import *
 from helpers import login_required
 
-# Configure application
-app = Flask(__name__)
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
-app.config["SQLALCHEMY_ECHO"] = True
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-app.config['SECRET_KEY'] = "dummy_secret_key"
-
-# Set up database
-db.init_app(app)
-with app.app_context():
-    db.create_all()
-
 
 @app.route("/")
 @login_required
