@@ -6,6 +6,16 @@ from mensable.auth import login_required
 bp = Blueprint("api", __name__)
 
 
+@bp.route("/")
+@login_required
+def home():
+    """Render homepage"""
+    user = User.query.filter_by(id=session["user_id"]).first()
+    if not user:
+        return redirect("/login")
+    return render_template("home.html", username=user.name)
+
+
 @bp.route("/create_language", methods=["GET", "POST"])
 @login_required
 def create_language():
@@ -133,21 +143,4 @@ def tables(language_name=None):
         language = Language.query.filter_by(name=language_name).first()
         tables = Table.query.filter_by(language_id=language.id)
     return render_template("tables.html", tables=tables)
-
-
-
-
-
-# The code below is taken from the CS50 finance exercise - need to figure out
-# what it does, have disabled it for now because it seems to interfere with the
-# flash message functionality.
-
-#@bp.after_request
-#def after_request(response):
-#    """Ensure responses aren't cached"""
-#    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#    response.headers["Expires"] = 0
-#    response.headers["Pragma"] = "no-cache"
-#    return response
-
 

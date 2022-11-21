@@ -20,17 +20,6 @@ def login_required(f):
     return decorated_function
 
 
-@bp.route("/")
-@login_required
-def home():
-    """Render homepage"""
-    user = User.query.filter_by(id=session["user_id"]).first()
-    if not user:
-        return redirect("/login")
-    return render_template("home.html", username=user.name)
-
-
-
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
