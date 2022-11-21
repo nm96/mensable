@@ -24,6 +24,8 @@ def login_required(f):
 def login():
     """Log user in"""
 
+    session.clear()
+
     if request.method == "GET":
         return render_template("login.html")
 

@@ -19,19 +19,25 @@ def test_register(client, app):
 def test_login(client, auth):
     # Check that page appears on GET.
     assert client.get('/login').status_code == 200
-    # Check that POST redirects appropriately
+    # Check that POST redirects appropriately given valid login details.
     response = auth.login()
     assert response.headers['Location'] == '/'
     # Check that user is registered in session as logged in.
     with client:
         client.get('/')
         assert session['user_id'] == 1
+    # Check that POST redirects appropriately given INVALID login details.
+    # Check that no user is registered in the sesssion.
+    with client:
+        response = auth.login('z', 'z')
+        assert response.headers['Location'] == '/login'
+        assert 'user_id' not in session
 
 
 def test_logout(client, auth):
     # First log in
     auth.login()
-    # Then log out and check that session is clear.
+    # Then log out and check that no user is registered in the session.
     with client:
         auth.logout()
         assert 'user_id' not in session

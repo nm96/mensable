@@ -1,5 +1,5 @@
 import pytest
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 from mensable import create_app, db
 from mensable.models import *
