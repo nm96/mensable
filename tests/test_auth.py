@@ -13,3 +13,17 @@ def test_register(client, app):
     assert user is not None
 
 
+def test_login(client, auth):
+    assert client.get('/login').status_code == 200
+    response = auth.login()
+    assert response.headers['Location'] == '/'
+    with client:
+        client.get('/')
+        assert session['user_id'] == 1
+
+
+def test_logout(client, auth):
+    auth.login()
+    with client:
+        response = auth.logout()
+        assert 'user_id' not in session

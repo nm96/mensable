@@ -1,11 +1,20 @@
 import pytest
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from mensable import create_app, db
+from mensable.models import *
 
 @pytest.fixture
 def app():
     app = create_app({'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': "sqlite:///:memory:"})
+
+    with app.app_context():
+        # Add dummy user to database
+        user = User('test', generate_password_hash('test'))
+        db.session.add(user)
+        db.session.commit()
+
     return app
 
 
