@@ -1,104 +1,12 @@
-from flask import Flask, flash, render_template, request, session, redirect
-from flask_session import Session
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import check_password_hash, generate_password_hash
+from flask import flash, render_template, request, session, redirect, Blueprint
 
-from models import *
-from helpers import login_required
+from mensable.models import *
+from mensable.auth import login_required
 
-
-@app.route("/")
-@login_required
-def home():
-    """Render homepage"""
-    user = User.query.filter_by(id=session["user_id"]).first()
-    if not user:
-        return redirect("/login")
-    return render_template("home.html", username=user.name)
+bp = Blueprint("api", __name__)
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    """Log user in"""
-
-    if request.method == "GET":
-        return render_template("login.html")
-
-    elif request.method == "POST":
-        # Record username from login form
-        username = request.form["username"]
-        password = request.form["password"]
-
-        if not username:
-            flash("Please enter a username.")
-            return redirect("/login")
-            
-        if not password:
-            flash("Please enter a password.")
-            return redirect("/login")
-
-        user = User.query.filter_by(name=username).first()
-        if not user:
-            flash("Username not recognized - try again or register for an account.")
-            return redirect("/login")
-        
-        if not check_password_hash(user.password_hash, password):
-            flash(f"Incorrect password for user {username}.")
-            return redirect("/login")
-
-        # NOTE the use of f-strings in lines like the above is probably a bit
-        # of a security risk.
-
-        session["user_id"] = user.id
-        return redirect("/")
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    """Register a new user"""
-
-    if request.method == "GET":
-        return render_template("register.html")
-
-    elif request.method == "POST":
-
-        username = request.form["username"]
-
-        if not username.isalnum():
-            flash("Please enter a valid alphanumeric username.")
-            return redirect("/register")
-
-        user_exists = User.query.filter_by(name=username).first()
-        if user_exists:
-            flash(f"Username taken.")
-            return redirect("/register")
-
-        password = request.form["password"]
-        if not password:
-            flash("Please enter a password.")
-            return redirect("/register")
-
-        if password != request.form["confirmation"]:
-            flash("Password and confirmation must match.")
-            return redirect("/register")
-
-        password_hash = generate_password_hash(password)
-        user = User(username, password_hash)
-        db.session.add(user)
-        db.session.commit()
-        session["user_id"] = user.id
-        flash(f"User {username} registered and logged in - welcome to Mensable.")
-        return redirect("/")
-
-
-@app.route("/logout")
-def logout():
-    """Log user out"""
-    session.clear()
-    return redirect("/")
-
-
-@app.route("/create_language", methods=["GET", "POST"])
+@bp.route("/create_language", methods=["GET", "POST"])
 @login_required
 def create_language():
     
@@ -123,7 +31,7 @@ def create_language():
         return redirect("/create_table/" + language_name)
 
 
-@app.route("/create_table/<language_name>", methods=["GET", "POST"])
+@bp.route("/create_table/<language_name>", methods=["GET", "POST"])
 @login_required
 def create_table(language_name):
     """Create a new word table to learn"""
@@ -153,7 +61,7 @@ def create_table(language_name):
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
 
-@app.route("/edit_table/<language_name>/<table_name>", methods=["GET", "POST"])
+@bp.route("/edit_table/<language_name>/<table_name>", methods=["GET", "POST"])
 @login_required
 def edit_table(language_name, table_name):
     """Edit an existing word table"""
@@ -184,7 +92,7 @@ def edit_table(language_name, table_name):
 
 
 
-@app.route("/delete_word/<language_name>/<table_name>", methods=["POST"])
+@bp.route("/delete_word/<language_name>/<table_name>", methods=["POST"])
 @login_required
 def delete_word(language_name, table_name):
     """Delete a word."""
@@ -197,7 +105,7 @@ def delete_word(language_name, table_name):
 
 
 
-@app.route("/view_table/<language_name>/<table_name>", methods=["GET"])
+@bp.route("/view_table/<language_name>/<table_name>", methods=["GET"])
 @login_required
 def view_table(language_name, table_name):
     """View an existing word table"""
@@ -214,8 +122,8 @@ def view_table(language_name, table_name):
     return render_template("view_table.html", table=table)
 
 
-@app.route("/tables")
-@app.route("/tables/<language_name>")
+@bp.route("/tables")
+@bp.route("/tables/<language_name>")
 @login_required
 def tables(language_name=None):
     """List all tables, or optionally all tables in a given language"""
@@ -234,7 +142,7 @@ def tables(language_name=None):
 # what it does, have disabled it for now because it seems to interfere with the
 # flash message functionality.
 
-#@app.after_request
+#@bp.after_request
 #def after_request(response):
 #    """Ensure responses aren't cached"""
 #    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"

@@ -1,7 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
+from mensable import db
 from datetime import date
 
-db = SQLAlchemy()
 
 class User(db.Model):
     """Basic information about user accounts"""
