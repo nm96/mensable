@@ -51,7 +51,7 @@ class Table(db.Model):
 class WordPair(db.Model):
     """A word in a foreign language/category and its translation/english
     definition."""
-    td = db.Column("id", db.Integer, primary_key=True)
+    id = db.Column("id", db.Integer, primary_key=True)
     foreignWord = db.Column(db.String(100))
     translation = db.Column(db.String(100))
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))

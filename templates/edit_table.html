@@ -1,16 +1,33 @@
 {% extends "base.html" %}
 
 {% block body %}
-<form action="/edit_table/{{ language.name }}/{{ table.name }}" method="post">
-		<div class="container-fluid">
-			<h3>Editing {{ table.name | capitalize }}</h3>
-		</div>
-        <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control w-auto" id="foreignWord" name="foreignWord" placeholder="Word" type="text" required>
-            <input autocomplete="off" autofocus class="form-control w-auto" id="translation" name="translation" placeholder="Translation" type="text" required>
-			<br>
-        	<button class="btn btn-primary" type="submit">Add</button>
-			<a class="btn btn-info" href="/view_table/{{ language.name }}/{{ table.name }}" role="button">View Table</a>
-        </div>
-    </form>
+	<div class="container-fluid">
+		<h3>Editing {{ table.name | capitalize }}</h3>
+	</div>
+	<form action="/edit_table/{{ language.name }}/{{ table.name }}" method="post" id="add_word"></form>
+	<form action="/delete_word/{{ language.name }}/{{ table.name }}" method="post" id="delete_word"></form>
+	<table class="table">
+		<tbody>
+			<tr>
+				<td>
+					<input form="add_word" autocomplete="off" autofocus class="form-control" id="foreignWord" name="foreignWord" placeholder="Word" type="text" required>
+				</td>
+				<td>
+					<input form="add_word" autocomplete="off" class="form-control" id="translation" name="translation" placeholder="Translation" type="text" required>
+				</td>
+				<td>
+					<button form="add_word" class="btn btn-primary" type="submit">Add</button>
+				</td>
+			</tr>
+			{% for word_pair in table.words %}		
+			<tr>
+				<td class="text-start">{{ word_pair.foreignWord }}</td>
+				<td class="text-start">{{ word_pair.translation }}</td>
+				<td>
+					<button form="delete_word" class="btn btn-light" type="submit" name="word_pair_id" value="{{ word_pair.id }}">Delete</button>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>	
 {% endblock %}

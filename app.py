@@ -197,6 +197,20 @@ def edit_table(language_name, table_name):
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
 
+
+@app.route("/delete_word/<language_name>/<table_name>", methods=["POST"])
+@login_required
+def delete_word(language_name, table_name):
+    """Delete a word."""
+    table = Table.query.filter_by(name=table_name).first()
+    language = Language.query.filter_by(name=language_name).first()
+    word_pair_id = request.form["word_pair_id"]
+    WordPair.query.filter_by(id=word_pair_id).delete()
+    db.session.commit()
+    return redirect(f"/edit_table/{language_name}/{table_name}")
+
+
+
 @app.route("/view_table/<language_name>/<table_name>", methods=["GET"])
 @login_required
 def view_table(language_name, table_name):
