@@ -4,3 +4,5 @@ instance/
 flask_session/
 templates/empty.html
 todo.txt
+.coverage
+UNKNOWN.egg-info/

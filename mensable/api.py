@@ -109,7 +109,8 @@ def delete_word(language_name, table_name):
     table = Table.query.filter_by(name=table_name).first()
     language = Language.query.filter_by(name=language_name).first()
     word_pair_id = request.form["word_pair_id"]
-    WordPair.query.filter_by(id=word_pair_id).delete()
+    word_pair = WordPair.query.filter_by(id=word_pair_id).first()
+    db.session.delete(word_pair)
     db.session.commit()
     return redirect(f"/edit_table/{language_name}/{table_name}")
 
