@@ -78,3 +78,27 @@ def test_delete_word(client, auth):
     response = client.post(route, data={'word_pair_id': 1})
     # TODO: Check word pair has actually been deleted.
     assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+
+
+def test_view_table(client, auth):
+    auth.login()
+    route = '/view_table/Testese/Testtable'
+
+    # First check nonexistent table redirects to home
+    response = client.get('/view_table/Testese/Notatable')
+    assert response.headers['Location'] == '/' 
+
+    # Then check empty table redirects to edit
+    response = client.get(route) 
+    assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+
+    # Now populate table and check that page can be viewed
+    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
+        'test'})
+    assert client.get(route).status_code == 200
+
+
+def test_tables(client, auth):
+    auth.login()
+    assert client.get('/tables').status_code == 200
+    assert client.get('/tables/Testese').status_code == 200
