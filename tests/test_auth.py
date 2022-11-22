@@ -1,7 +1,7 @@
 import pytest
 from flask import session
 
-from mensable.models import User
+from mensable.models import *
 
 
 def test_login_required(client):

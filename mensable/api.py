@@ -11,8 +11,6 @@ bp = Blueprint("api", __name__)
 def home():
     """Render homepage"""
     user = User.query.filter_by(id=session["user_id"]).first()
-    if not user:
-        return redirect("/login")
     return render_template("home.html", username=user.name)
 
 

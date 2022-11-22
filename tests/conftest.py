@@ -13,6 +13,9 @@ def app():
         # Add dummy user to database
         user = User('testuser', generate_password_hash('testpwd'))
         db.session.add(user)
+        # Add dummy language to database
+        language = Language('Testese')
+        db.session.add(language)
         db.session.commit()
 
     yield app
