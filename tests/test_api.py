@@ -33,8 +33,10 @@ def test_create_language(app, auth, client):
 
 
 def test_create_table(app, auth, client):
-    route = '/create_table/Testese'
     auth.login()
+
+    # Now use a route where we specify the language
+    route = '/create_table/Testese'
     assert client.get(route).status_code == 200
 
     # Try a valid new table
@@ -51,6 +53,8 @@ def test_create_table(app, auth, client):
     # Try an invalid table name, check for redirect
     response = client.post(route, data={'table_name': '%&^&%&%'})
     assert response.headers['Location'] == route
+
+
 
 
 def test_edit_table(app, auth, client):
@@ -77,10 +81,12 @@ def test_edit_table(app, auth, client):
 def test_delete_word(app, auth, client):
     auth.login()
     route = '/delete_word/Testese/Testtable'
+
     # First create a word to delete using /edit_table (TODO - put this in
     # conftest for consistency?)
     client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
         'test'})
+
     # Now delete it
     response = client.post(route, data={'word_pair_id': 1})
     assert response.headers['Location'] == '/edit_table/Testese/Testtable'
