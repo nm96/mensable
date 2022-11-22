@@ -88,7 +88,7 @@ def edit_table(language_name, table_name):
         translation = translation.strip()
         # Check if words are (still) non-empty
         if not foreignWord or not translation:
-            flash("please enter both a word and a translation")
+            flash("Please enter both a word and a translation.")
             return redirect(f"/edit_table/{language_name}/{table_name}")
         # Enter word pair into database.
         word_pair = WordPair(foreignWord, translation)

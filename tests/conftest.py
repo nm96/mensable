@@ -10,13 +10,19 @@ def app():
         'SQLALCHEMY_DATABASE_URI': "sqlite:///:memory:"})
 
     with app.app_context():
-        # Add dummy user to database
+        # Add dummy user to temporary test database
         user = User('testuser', generate_password_hash('testpwd'))
         db.session.add(user)
-        # Add dummy language to database
+        # Add dummy language
         language = Language('Testese')
         db.session.add(language)
+        # Add a dummy table
+        table = Table('Testtable')
+        table.creator_id = 1
+        table.language_id = 1
+        db.session.add(table)
         db.session.commit()
+
 
     yield app
 
