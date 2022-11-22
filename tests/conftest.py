@@ -23,11 +23,7 @@ def app():
         db.session.add(table)
         db.session.commit()
 
-
-    yield app
-
-    #TODO: Tear down the database
-
+    return app
 
 
 @pytest.fixture

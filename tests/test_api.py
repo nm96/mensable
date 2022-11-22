@@ -10,7 +10,7 @@ def test_home(client, auth):
     assert client.get('/').status_code == 200
 
 
-def test_create_language(client, auth):
+def test_create_language(app, auth, client):
     route = '/create_language'
     auth.login()
     assert client.get(route).status_code == 200
@@ -19,6 +19,9 @@ def test_create_language(client, auth):
     new_language_name = 'Newese'
     response = client.post(route, data={'language_name': new_language_name})
     assert response.headers['Location'] == '/create_table/' + new_language_name
+    with app.app_context():
+        language = Language.query.filter_by(name=new_language_name).first()
+        assert language is not None
 
     # Try an existing langauge
     response = client.post(route, data={'language_name': 'Testese'})
@@ -29,7 +32,7 @@ def test_create_language(client, auth):
     assert response.headers['Location'] == route
 
 
-def test_create_table(client, auth):
+def test_create_table(app, auth, client):
     route = '/create_table/Testese'
     auth.login()
     assert client.get(route).status_code == 200
@@ -37,17 +40,20 @@ def test_create_table(client, auth):
     # Try a valid new table
     response = client.post(route, data={'table_name': 'Newtable'})
     assert response.headers['Location'] == '/edit_table/Testese/Newtable'
+    with app.app_context():
+        table = Table.query.filter_by(name='Newtable').first()
+        assert table is not None
 
-    # Try an existing table
+    # Try an existing table, check for redirect
     response = client.post(route, data={'table_name': 'Testtable'})
     assert response.headers['Location'] == route
 
-    # Try an invalid table name
+    # Try an invalid table name, check for redirect
     response = client.post(route, data={'table_name': '%&^&%&%'})
     assert response.headers['Location'] == route
 
 
-def test_edit_table(client, auth):
+def test_edit_table(app, auth, client):
     route = '/edit_table/Testese/Testtable'
     auth.login()
     assert client.get(route).status_code == 200
@@ -56,8 +62,9 @@ def test_edit_table(client, auth):
     response = client.post(route, data={'foreignWord': 'testo', 'translation':
         'test'})
     assert response.headers['Location'] == route
-    # TODO: Check if word is actually in database (and do similar queries in
-    # other tests)
+    with app.app_context():
+        word_pair = WordPair.query.filter_by(foreignWord='testo').first()
+        assert word_pair is not None
 
     # Try adding invalid word pairs
     response = client.post(route, data={'foreignWord': '', 'translation':
@@ -67,7 +74,7 @@ def test_edit_table(client, auth):
     assert response.headers['Location'] == route
 
 
-def test_delete_word(client, auth):
+def test_delete_word(app, auth, client):
     auth.login()
     route = '/delete_word/Testese/Testtable'
     # First create a word to delete using /edit_table (TODO - put this in
@@ -76,11 +83,14 @@ def test_delete_word(client, auth):
         'test'})
     # Now delete it
     response = client.post(route, data={'word_pair_id': 1})
-    # TODO: Check word pair has actually been deleted.
     assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+    with app.app_context():
+        word_pair = WordPair.query.filter_by(foreignWord='testo').first()
+        assert word_pair is None
 
 
-def test_view_table(client, auth):
+
+def test_view_table(auth, client):
     auth.login()
     route = '/view_table/Testese/Testtable'
 

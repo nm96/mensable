@@ -41,7 +41,7 @@ def test_register(client, app):
     # Check that the user just registered can be found in the database.
     with app.app_context():
         user = User.query.filter_by(name='newuser').first()
-    assert user is not None
+        assert user is not None
     # Check that POST redirects appropriately for invalid registration details.
     invalid_registrations = [(' *)^ ', 'newpwd', 'newpwd'),
                              ('testuser', 'testpwd', 'testpwd'),
@@ -52,6 +52,11 @@ def test_register(client, app):
                                                   'password': registration[1],
                                                   'confirmation': registration[2]})
         assert response.headers['Location'] == '/register'
+    with app.app_context():
+        user = User.query.filter_by(name='newuser2').first()
+        assert user is None
+        user = User.query.filter_by(name='newuser3').first()
+        assert user is None
 
 
 def test_logout(client, auth):
