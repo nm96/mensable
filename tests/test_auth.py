@@ -27,11 +27,15 @@ def test_login(client, auth):
         client.get('/')
         assert session['user_id'] == 1
     # Check that POST redirects appropriately given INVALID login details.
-    # Check that no user is registered in the sesssion.
-    with client:
-        response = auth.login('z', 'z')
+    invalid_logins = [('','test_pwd'),
+                      ('test_user', ''), 
+                      ('not_user', 'not_pwd'),
+                      ('test_user', 'wrong_pwd')]
+    for login in invalid_logins:
+        response = auth.login(*login)
         assert response.headers['Location'] == '/login'
-        assert 'user_id' not in session
+
+
 
 
 def test_logout(client, auth):

@@ -11,7 +11,7 @@ def app():
 
     with app.app_context():
         # Add dummy user to database
-        user = User('test', generate_password_hash('test'))
+        user = User('test_user', generate_password_hash('test_pwd'))
         db.session.add(user)
         db.session.commit()
 
@@ -27,7 +27,7 @@ class AuthActions(object):
     def __init__(self, client):
         self._client = client
 
-    def login(self, username='test', password='test'):
+    def login(self, username='test_user', password='test_pwd'):
         return self._client.post(
             '/login',
             data={'username': username, 'password': password}
