@@ -11,11 +11,14 @@ def app():
 
     with app.app_context():
         # Add dummy user to database
-        user = User('test_user', generate_password_hash('test_pwd'))
+        user = User('testuser', generate_password_hash('testpwd'))
         db.session.add(user)
         db.session.commit()
 
-    return app
+    yield app
+
+    #TODO: Tear down the database
+
 
 
 @pytest.fixture
@@ -27,7 +30,7 @@ class AuthActions(object):
     def __init__(self, client):
         self._client = client
 
-    def login(self, username='test_user', password='test_pwd'):
+    def login(self, username='testuser', password='testpwd'):
         return self._client.post(
             '/login',
             data={'username': username, 'password': password}

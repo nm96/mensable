@@ -6,6 +6,7 @@ from mensable.models import *
 
 bp = Blueprint("auth", __name__)
 
+
 def login_required(f):
     """
     Decorate routes to require login.
