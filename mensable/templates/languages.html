@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block body %}
+	<div class="container-fluid">
+		<h2>
+			Languages
+		</h2>
+	</div>	
+	<table class="table">
+		{% for language in languages %}
+		<tr>
+			<td class="text-start"><a href="/tables/{{ language.name }}">{{ language.name }}</a></td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

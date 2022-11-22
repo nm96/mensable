@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block body %}
+	<div class="container-fluid">
+		<h2>
+			{{ language.name }} Tables
+		</h2>
+	</div>	
+	<div class="mb-3">
+		<a class="btn btn-primary" href="/create_table/{{ language.name }}" role="button">Create New</a>
+	</div>
+	<table class="table">
+		{% for table in tables %}
+		<tr>
+			<td class="text-start"><a href="/view_table/{{ language.name }}/{{ table.name }}">{{ table.name | capitalize }}</a></td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

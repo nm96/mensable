@@ -55,8 +55,6 @@ def test_create_table(app, auth, client):
     assert response.headers['Location'] == route
 
 
-
-
 def test_edit_table(app, auth, client):
     route = '/edit_table/Testese/Testtable'
     auth.login()
@@ -118,3 +116,8 @@ def test_tables(client, auth):
     auth.login()
     assert client.get('/tables').status_code == 200
     assert client.get('/tables/Testese').status_code == 200
+
+
+def test_languages(client, auth):
+    auth.login()
+    assert client.get('/languages').status_code == 200

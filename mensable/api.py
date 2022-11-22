@@ -30,12 +30,13 @@ def create_language():
 
         existing_language = Language.query.filter_by(name=language_name).first()
         if existing_language:
-            flash(f"Language {language_name} already exists.")
+            flash(f"The language {language_name} already exists.")
             return redirect("/create_language")
 
         language = Language(language_name)
         db.session.add(language)
         db.session.commit()
+        flash("Now create a first table in the new language.")
         return redirect("/create_table/" + language_name)
 
 
@@ -138,8 +139,16 @@ def tables(language_name=None):
     """List all tables, or optionally all tables in a given language"""
     if not language_name:
         tables = Table.query.all()
+        return render_template("all_tables.html", tables=tables)
     else:
         language = Language.query.filter_by(name=language_name).first()
         tables = Table.query.filter_by(language_id=language.id)
-    return render_template("tables.html", tables=tables)
+        return render_template("tables_in_language.html", tables=tables,
+                language=language)
 
+
+@bp.route("/languages")
+@login_required
+def languages():
+    languages = Language.query.all()
+    return render_template("languages.html", languages=languages)
