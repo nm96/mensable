@@ -67,4 +67,14 @@ def test_edit_table(client, auth):
     assert response.headers['Location'] == route
 
 
-
+def test_delete_word(client, auth):
+    auth.login()
+    route = '/delete_word/Testese/Testtable'
+    # First create a word to delete using /edit_table (TODO - put this in
+    # conftest for consistency?)
+    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
+        'test'})
+    # Now delete it
+    response = client.post(route, data={'word_pair_id': 1})
+    # TODO: Check word pair has actually been deleted.
+    assert response.headers['Location'] == '/edit_table/Testese/Testtable'
