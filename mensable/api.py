@@ -6,6 +6,19 @@ from mensable.auth import login_required
 bp = Blueprint("api", __name__)
 
 
+def is_letters_and_spaces(s):
+    """Check that a string is non-empty and contains only letters and spaces.
+
+    Used to sanitize user input for language names, table names and word pairs.
+    """
+    if not s:
+        return False
+    for c in s:
+        if not (c.isalnum() or c.isspace()):
+            return False
+    return True
+
+
 @bp.route("/")
 @login_required
 def home():
@@ -17,15 +30,16 @@ def home():
 @bp.route("/create_language", methods=["GET", "POST"])
 @login_required
 def create_language():
+    """Create a new language."""
     
     if request.method == "GET":
         return render_template("create_language.html")
 
     elif request.method == "POST":
-        language_name = request.form["language_name"]
+        language_name = request.form["language_name"].strip()
 
-        if not language_name.isalnum():
-            flash("Language name can only contain alphanumeric characters.")
+        if not is_letters_and_spaces(language_name):
+            flash("Language name can contain only letters and spaces.")
             return redirect("/create_language")
 
         existing_language = Language.query.filter_by(name=language_name).first()
@@ -51,10 +65,10 @@ def create_table(language_name):
         return render_template("create_table.html", language=language)
 
     elif request.method == "POST":
-        table_name = request.form["table_name"]
+        table_name = request.form["table_name"].strip()
 
-        if not table_name.isalnum():
-            flash("Table name can only contain alphanumeric characters.")
+        if not is_letters_and_spaces(table_name):
+            flash("Table name can contain only letters and spaces.")
             return redirect(f"/create_table/{language_name}")
 
         existing_table = Table.query.filter_by(name=table_name).first()
@@ -82,20 +96,19 @@ def edit_table(language_name, table_name):
 
     elif request.method == "POST":
         # Get word and translation from input form.
-        foreignWord = request.form["foreignWord"]
-        translation = request.form["translation"]
-        # Tidy them up by removing spaces at start and end.
-        foreignWord = foreignWord.strip()
-        translation = translation.strip()
-        # Check if words are (still) non-empty
-        if not foreignWord or not translation:
-            flash("Please enter both a word and a translation.")
+        foreignWord = request.form["foreignWord"].strip()
+        translation = request.form["translation"].strip()
+
+        # Then check if words contain only letters and spaces.
+        if not is_letters_and_spaces(foreignWord) or not is_letters_and_spaces(translation):
+            flash("Words can contain only letters and spaces.")
             return redirect(f"/edit_table/{language_name}/{table_name}")
+
         # Enter word pair into database.
         word_pair = WordPair(foreignWord, translation)
         word_pair.language_id = language.id
         db.session.add(word_pair)
-        table.words.append(word_pair)
+        table.words.append(word_pair)   # Maintain many-to-many relationship.
         db.session.commit()
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
