@@ -2,7 +2,7 @@
 
 {% block body %}
 	<div class="container-fluid">
-		<h3>Editing {{ table.name | capitalize }}</h3>
+		<h3>Editing {{ table.name }}</h3>
 	</div>
 	<form action="/edit_table/{{ language.name }}/{{ table.name }}" method="post" id="add_word"></form>
 	<form action="/delete_word/{{ language.name }}/{{ table.name }}" method="post" id="delete_word"></form>
