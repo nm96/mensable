@@ -13,6 +13,13 @@ class User(db.Model):
         self.name = name
         self.password_hash = password_hash
 
+    def check_name(self):
+        # Allow usernames to contain only letters, numbers and underscores.
+        for c in self.name:
+            if not (c.isalnum() or c == "_"):
+                return False
+        return True
+
 
 class Language(db.Model):
     """Top-level category for word tables. Could be an actual language or
@@ -24,6 +31,13 @@ class Language(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+    def check_name(self):
+        # Allow language names to contain only letters and spaces.
+        for c in self.name:
+            if not (c.isalpha() or c == " "):
+                return False
+        return True
 
 
 # Helper table for documenting Table/WordPair relationships
@@ -45,6 +59,13 @@ class Table(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+    def check_name(self):
+        # Allow table names to contain only letters, numbers and spaces.
+        for c in self.name:
+            if not (c.isalnum() or c == " "):
+                return False
+        return True
     
 
 class WordPair(db.Model):

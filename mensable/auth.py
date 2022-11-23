@@ -68,10 +68,6 @@ def register():
 
         username = request.form["username"]
 
-        if not username.isalnum():
-            flash("Please enter a valid alphanumeric username.")
-            return redirect("/register")
-
         user_exists = User.query.filter_by(name=username).first()
         if user_exists:
             flash(f"Username taken.")
@@ -88,6 +84,11 @@ def register():
 
         password_hash = generate_password_hash(password)
         user = User(username, password_hash)
+    
+        if not user.check_name():
+            flash("Username can contain only letters, numbers and underscores.")
+            return redirect("/register")
+
         db.session.add(user)
         db.session.commit()
         session["user_id"] = user.id
