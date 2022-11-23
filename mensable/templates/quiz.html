@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block body %}
+	<h3>Translate '{{ word_pair.foreignWord }}'</h3>
+	<form action="/quiz/{{ table.language.name }}/{{ table.name }}" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control w-auto" id="answer" name="answer" placeholder="Answer" type="text" required>
+			<br>
+        	<button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+	</form>
+{% endblock %}

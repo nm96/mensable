@@ -112,12 +112,20 @@ def test_view_table(auth, client):
     assert client.get(route).status_code == 200
 
 
-def test_tables(client, auth):
+def test_tables(auth, client):
     auth.login()
     assert client.get('/tables').status_code == 200
     assert client.get('/tables/Testese').status_code == 200
 
 
-def test_languages(client, auth):
+def test_languages(auth, client):
     auth.login()
     assert client.get('/languages').status_code == 200
+
+
+def test_quiz(auth, client):
+    auth.login()
+    route = '/quiz/Testese/Testtable'
+    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
+        'test'})
+    assert client.get(route).status_code == 200

@@ -1,4 +1,5 @@
 from flask import flash, render_template, request, session, redirect, Blueprint
+import random
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -154,3 +155,28 @@ def tables(language_name=None):
 def languages():
     languages = Language.query.all()
     return render_template("languages.html", languages=languages)
+
+
+@bp.route("/quiz/<language_name>/<table_name>", methods=["GET", "POST"])
+@login_required
+def quiz(language_name, table_name):
+    """Test a user's knowledge of the words in a table with a randomized quiz"""
+
+    table = Table.query.filter_by(name=table_name).first()
+
+    if not table:
+        flash(f"Table {table_name} does not exist")
+        return redirect("/")
+
+    all_word_pairs = table.words
+
+    if not all_word_pairs:
+        flash(f"Table {table_name} is empty, try editing it here")
+        return redirect(f"/edit_table/{language_name}/{table_name}")
+
+    selected_word_pairs = random.sample(all_word_pairs, 
+                                        min(5, len(all_word_pairs)))
+
+    for word_pair in selected_word_pairs:
+        return render_template("quiz.html", table=table, word_pair=word_pair)
+
