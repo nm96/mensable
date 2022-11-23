@@ -47,11 +47,8 @@ def login():
             return redirect("/login")
         
         if not check_password_hash(user.password_hash, password):
-            flash(f"Incorrect password for user {username}.")
+            flash("Incorrect password.")
             return redirect("/login")
-
-        # NOTE the use of f-strings in lines like the above is probably a bit
-        # of a security risk.
 
         session["user_id"] = user.id
         return redirect("/")

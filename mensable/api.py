@@ -88,7 +88,7 @@ def edit_table(language_name, table_name):
         foreignWord = request.form["foreignWord"].strip()
         translation = request.form["translation"].strip()
 
-        # Then check if words exist.
+        # Check if words are non-empty.
         if not foreignWord or not translation:
             flash("Please enter both a word and a translation.")
             return redirect(f"/edit_table/{language_name}/{table_name}")
