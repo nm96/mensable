@@ -1,5 +1,6 @@
 from flask import flash, render_template, request, session, redirect, Blueprint
-import random
+from random import sample
+from time import sleep
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -162,21 +163,43 @@ def languages():
 def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
-    table = Table.query.filter_by(name=table_name).first()
+    if request.method == "GET":
 
-    if not table:
-        flash(f"Table {table_name} does not exist")
-        return redirect("/")
+        table = Table.query.filter_by(name=table_name).first()
 
-    all_word_pairs = table.words
+        if not table:
+            flash(f"Table {table_name} does not exist")
+            return redirect("/")
 
-    if not all_word_pairs:
-        flash(f"Table {table_name} is empty, try editing it here")
-        return redirect(f"/edit_table/{language_name}/{table_name}")
+        if "to_test" not in session:
+            # Load list of word pairs to learn as session variable
 
-    selected_word_pairs = random.sample(all_word_pairs, 
-                                        min(5, len(all_word_pairs)))
+            all_word_pairs = table.words
+            if not all_word_pairs:
+                flash(f"Table {table_name} is empty, try editing it here")
+                return redirect(f"/edit_table/{language_name}/{table_name}")
+            selected_word_pairs = sample(all_word_pairs, 
+                                                min(5, len(all_word_pairs)))
+            session["to_test"] = selected_word_pairs
+            return redirect(f"/quiz/{language_name}/{table_name}")
 
-    for word_pair in selected_word_pairs:
-        return render_template("quiz.html", table=table, word_pair=word_pair)
+        else:
+            word_pair = session["to_test"][0]
+            return render_template("quiz.html", table=table,
+                    word_pair=word_pair)
+
+
+    elif request.method == "POST":
+        word_pair = session["to_test"][0]
+        answer = request.form["answer"]
+
+        if word_pair.translation == answer:
+            flash("Correct!")
+            return redirect("/")
+        else:
+            flash("Wrong!")
+            return redirect("/")
+
+
+
 
