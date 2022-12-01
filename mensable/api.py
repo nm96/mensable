@@ -168,7 +168,7 @@ def quiz(language_name, table_name):
         table = Table.query.filter_by(name=table_name).first()
 
         if not table:
-            flash(f"Table {table_name} does not exist")
+            flash(f"Table {table_name} not found")
             return redirect("/")
 
         if "to_test" not in session:
@@ -181,7 +181,8 @@ def quiz(language_name, table_name):
             return redirect(f"/quiz/{language_name}/{table_name}")
 
         else:
-            # If list of words to test is empty, redirect back to view table.
+            # If list of words to test is empty, clear the relevant session
+            # variables and display the results.
             if len(session["to_test"]) == 0:
                 correct = session["test_score"]["correct"]
                 total = session["test_score"]["total"]
@@ -210,7 +211,7 @@ def quiz(language_name, table_name):
             session["test_score"]["correct"] += 1
             session["test_score"]["total"] += 1
         else:
-            flash("Wrong!")
+            flash(f"Wrong! The correct translation is {word_pair.translation}.")
             session["test_score"]["total"] += 1
 
         session["to_test"] = session["to_test"][1:]
