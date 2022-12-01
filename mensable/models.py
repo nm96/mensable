@@ -1,5 +1,4 @@
 from datetime import date
-from dataclasses import dataclass
 
 from mensable import db
 
@@ -69,7 +68,7 @@ class Table(db.Model):
                 return False
         return True
     
-@dataclass
+
 class WordPair(db.Model):
     """A word in a foreign language/category and its translation/english
     definition."""

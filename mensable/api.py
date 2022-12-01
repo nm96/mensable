@@ -172,33 +172,40 @@ def quiz(language_name, table_name):
             return redirect("/")
 
         if "to_test" not in session:
-            # Load list of word pairs to learn as session variable
-
-            all_word_pairs = table.words
-            if not all_word_pairs:
-                flash(f"Table {table_name} is empty, try editing it here")
-                return redirect(f"/edit_table/{language_name}/{table_name}")
-            selected_word_pairs = sample(all_word_pairs, 
-                                                min(5, len(all_word_pairs)))
-            session["to_test"] = selected_word_pairs
+            # Load list of word pairs IDs to learn as session variable
+            all_word_pair_ids = [word_pair.id for word_pair in table.words]
+            session["to_test"] = sample(all_word_pair_ids, 
+                                        min(5, len(all_word_pair_ids)))
             return redirect(f"/quiz/{language_name}/{table_name}")
 
         else:
-            word_pair = session["to_test"][0]
+            # If list of words to test is empty, redirect back to view table.
+            # TODO: Redirect to a 'results' pages instead, having saved marks
+            # the marks in a session variable.
+            if len(session["to_test"]) == 0:
+                del session["to_test"]
+                return redirect(f"/view_table/{language_name}/{table_name}")
+
+            # Otherwise ask user to translate current first word in the list.
+            word_pair_id = session["to_test"][0]
+            word_pair = WordPair.query.filter_by(id=word_pair_id).first()
             return render_template("quiz.html", table=table,
                     word_pair=word_pair)
 
 
     elif request.method == "POST":
-        word_pair = session["to_test"][0]
+        word_pair_id = session["to_test"][0]
+        word_pair = WordPair.query.filter_by(id=word_pair_id).first()
         answer = request.form["answer"]
 
+        # TODO: Allow non-exact matches here, record results
         if word_pair.translation == answer:
             flash("Correct!")
-            return redirect("/")
         else:
             flash("Wrong!")
-            return redirect("/")
+
+        session["to_test"] = session["to_test"][1:]
+        return redirect(f"/quiz/{language_name}/{table_name}")
 
 
 
