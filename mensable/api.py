@@ -176,15 +176,19 @@ def quiz(language_name, table_name):
             all_word_pair_ids = [word_pair.id for word_pair in table.words]
             session["to_test"] = sample(all_word_pair_ids, 
                                         min(5, len(all_word_pair_ids)))
+            # Set up dictionary to record test score
+            session["test_score"] = {"correct": 0, "total": 0}
             return redirect(f"/quiz/{language_name}/{table_name}")
 
         else:
             # If list of words to test is empty, redirect back to view table.
-            # TODO: Redirect to a 'results' pages instead, having saved marks
-            # the marks in a session variable.
             if len(session["to_test"]) == 0:
+                correct = session["test_score"]["correct"]
+                total = session["test_score"]["total"]
                 del session["to_test"]
-                return redirect(f"/view_table/{language_name}/{table_name}")
+                del session["test_score"]
+                return render_template("results.html", correct=correct,
+                        total=total)
 
             # Otherwise ask user to translate current first word in the list.
             word_pair_id = session["to_test"][0]
@@ -198,11 +202,16 @@ def quiz(language_name, table_name):
         word_pair = WordPair.query.filter_by(id=word_pair_id).first()
         answer = request.form["answer"]
 
-        # TODO: Allow non-exact matches here, record results
-        if word_pair.translation == answer:
+        # TODO: Use fuzzywuzzy to allow for typos
+        # TODO: Allow alternative translations
+        # TODO: Decide capitalization policy
+        if word_pair.translation.lower() == answer.lower():
             flash("Correct!")
+            session["test_score"]["correct"] += 1
+            session["test_score"]["total"] += 1
         else:
             flash("Wrong!")
+            session["test_score"]["total"] += 1
 
         session["to_test"] = session["to_test"][1:]
         return redirect(f"/quiz/{language_name}/{table_name}")
