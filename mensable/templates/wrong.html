@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block body %}
+<p>
+	Sorry, the correct translation of "{{ word_pair.foreignWord }}" is "{{ word_pair.translation }}".
+</p>
+<p>
+	(You put "{{ answer }}".)
+</p>
+
+<form action="/quiz/{{ table.language.name }}/{{ table.name }}" method="get">
+	<button autofocus class="btn btn-success" type="submit">Continue</button>
+</form>
+	
+{% endblock %}

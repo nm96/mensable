@@ -2,6 +2,7 @@ from flask import flash, render_template, request, session, redirect, Blueprint
 import os
 import csv
 import Levenshtein
+import sys
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -223,9 +224,9 @@ def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
     QUIZ_LENGTH = 5
+    table = Table.query.filter_by(name=table_name).first()
 
     if request.method == "GET":
-        table = Table.query.filter_by(name=table_name).first()
         user = User.query.filter_by(id=session["user_id"]).first()
 
         if "quiz" not in session:
@@ -296,23 +297,27 @@ def quiz(language_name, table_name):
                     word_pair=word_pair)
 
     elif request.method == "POST":
-        quiz = session["quiz"]
-        word_id = quiz["to_test"][0]
+        print("\n\n QUIZ = ", session["quiz"], file=sys.stderr)
+        word_id = session["quiz"]["to_test"][0]
+        session["quiz"]["to_test"] = session["quiz"]["to_test"][1:]
+        print("\n\n QUIZ = ", session["quiz"], file=sys.stderr)
         word_pair = WordPair.query.filter_by(id=word_id).first()
         answer = request.form["answer"]
 
-        # TODO: Use fuzzywuzzy to allow for typos
-        # TODO: Allow alternative translations
         # Compare answer to translation from database and record results.
         if compare_strings(answer, word_pair.translation):
-            flash("Correct!")
-            quiz["right_list"].append(word_id)
-            quiz["right_count"] += 1
+            flash(f"Correct: {word_pair.foreignWord} translates to {word_pair.translation}.")
+            session["quiz"]["right_list"].append(word_id)
+            session["quiz"]["right_count"] += 1
+            print("\n\n QUIZ = ", session["quiz"], file=sys.stderr)
+            session.modified = True
+            return redirect(f"/quiz/{language_name}/{table_name}")
         else:
-            flash(f"Wrong! The correct translation is {word_pair.translation}.")
-            quiz["wrong_list"].append(word_id)
-        quiz["to_test"] = quiz["to_test"][1:]
-        return redirect(f"/quiz/{language_name}/{table_name}")
+            session["quiz"]["wrong_list"].append(word_id)
+            print("\n\n QUIZ = ", session["quiz"], file=sys.stderr)
+            session.modified = True
+            return render_template("wrong.html", table=table,
+                    word_pair=word_pair, answer=answer)
 
 
 def compare_strings(s1, s2):
