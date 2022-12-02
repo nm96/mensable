@@ -154,6 +154,15 @@ def delete_word(language_name, table_name):
     return redirect(f"/edit_table/{language_name}/{table_name}")
 
 
+@bp.route("/delete_table/<language_name>/<table_name>", methods=["GET"])
+@login_required
+def delete_table(language_name, table_name):
+    """Delete a table."""
+    table = Table.query.filter_by(name=table_name).first()
+    db.session.delete(table)
+    db.session.commit()
+    return redirect(f"/tables/{language_name}")
+
 
 @bp.route("/view_table/<language_name>/<table_name>", methods=["GET"])
 @login_required
