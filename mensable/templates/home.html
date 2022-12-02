@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block body %}
-	<div class="container p-5">
+	<div class="container-fluid">
 		<h1>
 			{{ user.name }}
-		</h1>
+		</h2>
 		<h3>
 			Your tables:
-		</h3>
+		</h2>
 	</div>
 	<table class="table">
 		{% for sub in user.subscriptions %}

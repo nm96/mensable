@@ -90,20 +90,29 @@ def edit_table(language_name, table_name):
         # Get word and translation from input form.
         foreignWord = request.form["foreignWord"].strip()
         translation = request.form["translation"].strip()
+        add_word_pair(foreignWord, translation, table, language)
+        return redirect(f"/edit_table/{language.name}/{table.name}")
 
-        # Check if words are non-empty.
-        if not foreignWord or not translation:
-            flash("Please enter both a word and a translation.")
-            return redirect(f"/edit_table/{language_name}/{table_name}")
 
-        # Enter word pair into database.
-        word_pair = WordPair(foreignWord, translation)
-        word_pair.language_id = language.id
-        db.session.add(word_pair)
-        table.words.append(word_pair)   # Maintain many-to-many relationship.
-        db.session.commit()
-        return redirect(f"/edit_table/{language_name}/{table_name}")
+def add_word_pair(foreignWord, translation, table, language):
+    # Check that words are non-empty.
+    if not foreignWord or not translation:
+        flash("Please enter both a word and a translation.")
+        return
 
+    # Check if word is already in database.
+    existing = WordPair.query.filter_by(foreignWord=foreignWord).first()
+    if existing and existing.language_id == language.id:
+        flash(f"{foreignWord} is already in the database.")
+        return
+
+    # Enter word pair into database.
+    word_pair = WordPair(foreignWord, translation)
+    word_pair.language_id = language.id
+    db.session.add(word_pair)
+    table.words.append(word_pair)   # Maintain many-to-many relationship.
+    db.session.commit()
+    return
 
 
 @bp.route("/delete_word/<language_name>/<table_name>", methods=["POST"])
