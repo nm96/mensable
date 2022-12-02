@@ -8,7 +8,8 @@ def create_app(test_config=None):
     app.config["SQLALCHEMY_ECHO"] = True
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_TYPE"] = "filesystem"
-    app.config['SECRET_KEY'] = "dev"
+    app.config["SECRET_KEY"] = "dev"
+    app.config["UPLOAD_FOLDER"] = "static/files"
 
     if not test_config:
         app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///temp.db"

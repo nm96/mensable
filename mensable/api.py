@@ -1,6 +1,6 @@
 from flask import flash, render_template, request, session, redirect, Blueprint
-from random import sample
-from time import sleep
+import os
+import csv
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -88,13 +88,17 @@ def edit_table(language_name, table_name):
 
     elif request.method == "POST":
         # Get word and translation from input form.
-        foreignWord = request.form["foreignWord"].strip()
-        translation = request.form["translation"].strip()
+        foreignWord = request.form["foreignWord"]
+        translation = request.form["translation"]
         add_word_pair(foreignWord, translation, table, language)
         return redirect(f"/edit_table/{language.name}/{table.name}")
 
 
 def add_word_pair(foreignWord, translation, table, language):
+    # Strip whitespace
+    foreignWord = foreignWord.strip()
+    translation = translation.strip()
+
     # Check that words are non-empty.
     if not foreignWord or not translation:
         flash("Please enter both a word and a translation.")
@@ -113,6 +117,28 @@ def add_word_pair(foreignWord, translation, table, language):
     table.words.append(word_pair)   # Maintain many-to-many relationship.
     db.session.commit()
     return
+
+
+@bp.route("/upload_csv/<language_name>/<table_name>", methods=["GET", "POST"])
+@login_required
+def upload_csv(language_name, table_name):
+    """Edit an existing word table by adding words from a csv file"""
+    table = Table.query.filter_by(name=table_name).first()
+    language = Language.query.filter_by(name=language_name).first()
+
+    if request.method == "GET":
+        return render_template("upload_csv.html", language=language, table=table)
+
+    elif request.method == "POST":
+        uploaded_file = request.files["csv_file"]
+        filename = os.path.join(uploaded_file.filename)
+        uploaded_file.save(filename)
+        with open(filename) as csv_file:
+            for row in csv.reader(csv_file):
+                if len(row) == 2:
+                    foreignWord, translation = row
+                    add_word_pair(foreignWord, translation, table, language)
+        return redirect(f"/edit_table/{language.name}/{table.name}")
 
 
 @bp.route("/delete_word/<language_name>/<table_name>", methods=["POST"])
