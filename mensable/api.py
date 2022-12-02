@@ -1,6 +1,7 @@
 from flask import flash, render_template, request, session, redirect, Blueprint
 import os
 import csv
+import Levenshtein
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -302,9 +303,8 @@ def quiz(language_name, table_name):
 
         # TODO: Use fuzzywuzzy to allow for typos
         # TODO: Allow alternative translations
-        # TODO: Decide capitalization policy
         # Compare answer to translation from database and record results.
-        if word_pair.translation.lower() == answer.lower():
+        if compare_strings(answer, word_pair.translation):
             flash("Correct!")
             quiz["right_list"].append(word_id)
             quiz["right_count"] += 1
@@ -313,4 +313,16 @@ def quiz(language_name, table_name):
             quiz["wrong_list"].append(word_id)
         quiz["to_test"] = quiz["to_test"][1:]
         return redirect(f"/quiz/{language_name}/{table_name}")
+
+
+def compare_strings(s1, s2):
+    """Soft string comparison, converts to lower case and removes whitespace,
+    allows for typos up to a Levenshtein distance of 1"""
+    s1 = s1.lower()
+    s2 = s2.lower()
+    s1 = s1.replace(" ", "")
+    s2 = s2.replace(" ", "")
+    if Levenshtein.distance(s1, s2) <= 1:
+        return True
+    return False
 
