@@ -165,28 +165,44 @@ def quiz(language_name, table_name):
 
     if request.method == "GET":
         table = Table.query.filter_by(name=table_name).first()
+        user = User.query.filter_by(id=session["user_id"]).first()
 
         if not table:
             flash(f"Table {table_name} not found")
             return redirect("/")
 
         if "to_test" not in session:
-            # Load (random!) list of word pair IDs to learn as session variable
-            all_word_pair_ids = [word_pair.id for word_pair in table.words]
-            session["to_test"] = sample(all_word_pair_ids, 
-                                        min(5, len(all_word_pair_ids)))
+            # BEGINNING OF TEST: 
+            # First check if user is subscribed to table yet.
+            sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
+            # Create subscription if not.
+            if not sub:
+                sub = Subscription(user, table)
+                all_word_pair_ids = [word_pair.id for word_pair in table.words]
+                sub.leitner_boxes = [all_word_pair_ids, [], [], []]
+                db.session.add(sub)
+                db.session.commit()
+
+            # Load list of 5 highest-prioirity word pair IDs to learn from
+            # Leitner boxes. TODO: Make the quiz length variable.
+            flat_list = [id for box in sub.leitner_boxes for id in box]
+            session["to_test"] = flat_list[:5]
+
             # Set up dictionary to record test score
+            # TODO: Actually record which words were right and wrong
             session["test_score"] = {"correct": 0, "total": 0}
             return redirect(f"/quiz/{language_name}/{table_name}")
 
         else:
-            # If list of words to test is empty, clear the relevant session
-            # variables and display the results.
             if len(session["to_test"]) == 0:
+                # END OF TEST:
+                # Display score
                 correct = session["test_score"]["correct"]
                 total = session["test_score"]["total"]
                 del session["to_test"]
                 del session["test_score"]
+                sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
+                # TODO: Update leitner boxes
                 return render_template("results.html", correct=correct,
                         total=total)
 

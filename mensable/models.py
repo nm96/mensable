@@ -9,6 +9,8 @@ class User(db.Model):
     name = db.Column(db.String(100), unique=True)
     password_hash = db.Column(db.String(100))
     tables = db.relationship('Table', backref='creator', lazy=True)
+    subscriptions = db.relationship('Subscription', backref='learner',
+            lazy=True)
 
     def __init__(self, name, password_hash):
         self.name = name
@@ -41,6 +43,20 @@ class Language(db.Model):
         return True
 
 
+class Subscription(db.Model):
+    """Tracks which Tables a User is learning and what the current state of
+    their knowledge is via the Leitner system."""
+    id = db.Column("id", db.Integer, primary_key=True)
+    leitner_boxes = db.Column(db.PickleType)
+    learner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
+
+    def __init__(self, learner, table):
+        self.learner_id = learner.id
+        self.table_id = table.id
+        self.leitner_boxes = {}
+
+
 # Helper table for keeping track of which WordPairs are in which Tables
 table_word_pair = db.Table('table_word_pair',
         db.Column('word_pair_id', db.Integer, db.ForeignKey('word_pair.id')),
@@ -54,6 +70,7 @@ class Table(db.Model):
     name = db.Column(db.String(100), unique=True)
     words = db.relationship('WordPair', secondary=table_word_pair,
             backref='contained_in')
+    subscriptions = db.relationship('Subscription', backref='table')
     created = db.Column(db.String(20), default=date.today)
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
