@@ -13,7 +13,7 @@ bp = Blueprint("api", __name__)
 def home():
     """Render homepage"""
     user = User.query.filter_by(id=session["user_id"]).first()
-    return render_template("home.html", username=user.name)
+    return render_template("home.html", user=user)
 
 
 @bp.route("/create_language", methods=["GET", "POST"])
@@ -50,6 +50,7 @@ def create_table(language_name):
     """Create a new word table to learn"""
 
     language = Language.query.filter_by(name=language_name).first()
+    user = User.query.filter_by(id=session["user_id"]).first()
     
     if request.method == "GET":
         return render_template("create_table.html", language=language)
@@ -68,7 +69,7 @@ def create_table(language_name):
             flash("Table name can contain only letters and spaces.")
             return redirect(f"/create_table/{language_name}")
 
-        table.creator_id = session["user_id"]
+        table.creator_id = user.id
         table.language_id = language.id
         db.session.add(table)
         db.session.commit()
@@ -169,22 +170,17 @@ def quiz(language_name, table_name):
         table = Table.query.filter_by(name=table_name).first()
         user = User.query.filter_by(id=session["user_id"]).first()
 
-        if not table:
-            flash(f"Table {table_name} not found")
-            return redirect("/")
-
         if "quiz" not in session:
-            # BEGINNING OF TEST: 
-            # Create quiz dictionary
+            # Create quiz dictionary session variable.
             session["quiz"] = {}
-            quiz = session["quiz"] # Alias to simplify the following
+            quiz = session["quiz"] # (alias)
 
             # Check if user is subscribed to table yet.
             sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
+
             # Create subscription if not.
             if not sub:
                 sub = Subscription(user, table)
-                sub.leitner_boxes = {}
 
             # Update leitner boxes, checking for new and deleted words in list
             lboxes = sub.leitner_boxes.copy()
@@ -195,25 +191,23 @@ def quiz(language_name, table_name):
             for word_id in list(lboxes.keys()):
                 if word_id not in database_word_ids:
                     del lboxes[word_id]
-
             sub.leitner_boxes = lboxes
             db.session.add(sub)
             db.session.commit()
 
             # Load list of "QUIZ_LENGTH" highest-prioirity word pair IDs to learn from
             # Leitner boxes. 
-
             word_ids = list(lboxes.keys())
             word_ids.sort(key=lambda id: lboxes[id])
             word_ids = word_ids[:QUIZ_LENGTH]
-
             quiz["total_count"] = len(word_ids)
             quiz["word_ids"] = word_ids
             quiz["to_test"] = word_ids.copy()
             quiz["right_list"] = []
             quiz["wrong_list"] = []
             quiz["right_count"] = 0
-
+            
+            # Start quiz by redirecting back to the route.
             return redirect(f"/quiz/{language_name}/{table_name}")
 
         else:
@@ -227,7 +221,6 @@ def quiz(language_name, table_name):
                 for word_id in quiz["right_list"]:
                     # Move to next box along
                     lboxes[word_id] += 1
-                    #TODO: Limit number of boxes?
                 for word_id in quiz["wrong_list"]:
                     # Move back to first box
                     lboxes[word_id] = 0
@@ -253,6 +246,7 @@ def quiz(language_name, table_name):
         # TODO: Use fuzzywuzzy to allow for typos
         # TODO: Allow alternative translations
         # TODO: Decide capitalization policy
+        # Compare answer to translation from database and record results.
         if word_pair.translation.lower() == answer.lower():
             flash("Correct!")
             quiz["right_list"].append(word_id)
@@ -262,7 +256,4 @@ def quiz(language_name, table_name):
             quiz["wrong_list"].append(word_id)
         quiz["to_test"] = quiz["to_test"][1:]
         return redirect(f"/quiz/{language_name}/{table_name}")
-
-
-
 

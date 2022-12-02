@@ -3,7 +3,18 @@
 {% block body %}
 	<div class="container p-5">
 		<h1>
-			Welcome to Mensable, {{ username }}.
+			{{ user.name }}
 		</h1>
+		<h3>
+			Your tables:
+		</h3>
 	</div>
+	<table class="table">
+		{% for sub in user.subscriptions %}
+		<tr>
+			<td class="text-start"><a href="/view_table/{{ sub.table.language.name }}/{{ sub.table.name }}">{{ sub.table.name }}</a></td>
+			<td class="text-start">({{ sub.table.language.name }})</td>
+		</tr>
+		{% endfor %}
+	</table>
 {% endblock %}
