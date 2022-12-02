@@ -164,7 +164,6 @@ def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
     if request.method == "GET":
-
         table = Table.query.filter_by(name=table_name).first()
 
         if not table:
@@ -172,7 +171,7 @@ def quiz(language_name, table_name):
             return redirect("/")
 
         if "to_test" not in session:
-            # Load list of word pairs IDs to learn as session variable
+            # Load (random!) list of word pair IDs to learn as session variable
             all_word_pair_ids = [word_pair.id for word_pair in table.words]
             session["to_test"] = sample(all_word_pair_ids, 
                                         min(5, len(all_word_pair_ids)))
@@ -196,7 +195,6 @@ def quiz(language_name, table_name):
             word_pair = WordPair.query.filter_by(id=word_pair_id).first()
             return render_template("quiz.html", table=table,
                     word_pair=word_pair)
-
 
     elif request.method == "POST":
         word_pair_id = session["to_test"][0]

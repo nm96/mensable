@@ -3,6 +3,8 @@
 {% block body %}
 	<div class="container-fluid">
 		<h3>Editing {{ table.name }}</h3>
+		<a class="btn btn-primary" href="/quiz/{{ table.language.name }}/{{ table.name }}" role="button">Quiz</a>
+		<a class="btn btn-info" href="/view_table/{{ table.language.name }}/{{ table.name }}" role="button">View Table</a>
 	</div>
 	<form action="/edit_table/{{ language.name }}/{{ table.name }}" method="post" id="add_word"></form>
 	<form action="/delete_word/{{ language.name }}/{{ table.name }}" method="post" id="delete_word"></form>

@@ -41,7 +41,7 @@ class Language(db.Model):
         return True
 
 
-# Helper table for documenting Table/WordPair relationships
+# Helper table for keeping track of which WordPairs are in which Tables
 table_word_pair = db.Table('table_word_pair',
         db.Column('word_pair_id', db.Integer, db.ForeignKey('word_pair.id')),
         db.Column('table_id', db.Integer, db.ForeignKey('table.id')))
