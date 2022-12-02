@@ -72,6 +72,8 @@ def create_table(language_name):
         table.creator_id = user.id
         table.language_id = language.id
         db.session.add(table)
+        sub = Subscription(user, table)
+        db.session.add(sub)
         db.session.commit()
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
@@ -82,6 +84,10 @@ def edit_table(language_name, table_name):
     """Edit an existing word table"""
     table = Table.query.filter_by(name=table_name).first()
     language = Language.query.filter_by(name=language_name).first()
+
+    if table.creator_id != session["user_id"]:
+        flash("Cannot edit another user's table")
+        return redirect("/tables")
 
     if request.method == "GET":
         return render_template("edit_table.html", language=language, table=table)
@@ -108,6 +114,8 @@ def add_word_pair(foreignWord, translation, table, language):
     existing = WordPair.query.filter_by(foreignWord=foreignWord).first()
     if existing and existing.language_id == language.id:
         flash(f"{foreignWord} is already in the database.")
+        table.words.append(existing)
+        db.session.commit()
         return
 
     # Enter word pair into database.
@@ -154,14 +162,19 @@ def delete_word(language_name, table_name):
     return redirect(f"/edit_table/{language_name}/{table_name}")
 
 
-@bp.route("/delete_table/<language_name>/<table_name>", methods=["GET"])
+@bp.route("/delete_table/<language_name>/<table_name>", methods=["GET", "POST"])
 @login_required
 def delete_table(language_name, table_name):
     """Delete a table."""
     table = Table.query.filter_by(name=table_name).first()
-    db.session.delete(table)
-    db.session.commit()
-    return redirect(f"/tables/{language_name}")
+    if request.method == "GET":
+        return render_template("delete_table.html", table=table)
+    elif request.method == "POST":
+        for sub in table.subscriptions:
+            db.session.delete(sub)
+        db.session.delete(table)
+        db.session.commit()
+        return redirect(f"/tables/{language_name}")
 
 
 @bp.route("/view_table/<language_name>/<table_name>", methods=["GET"])
