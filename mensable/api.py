@@ -163,6 +163,8 @@ def languages():
 def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
+    QUIZ_LENGTH = 5
+
     if request.method == "GET":
         table = Table.query.filter_by(name=table_name).first()
         user = User.query.filter_by(id=session["user_id"]).first()
@@ -171,50 +173,81 @@ def quiz(language_name, table_name):
             flash(f"Table {table_name} not found")
             return redirect("/")
 
-        if "to_test" not in session:
+        if "quiz" not in session:
             # BEGINNING OF TEST: 
-            # First check if user is subscribed to table yet.
+            # Create quiz dictionary
+            session["quiz"] = {}
+            quiz = session["quiz"] # Alias to simplify the following
+
+            # Check if user is subscribed to table yet.
             sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
             # Create subscription if not.
             if not sub:
                 sub = Subscription(user, table)
-                all_word_pair_ids = [word_pair.id for word_pair in table.words]
-                sub.leitner_boxes = [all_word_pair_ids, [], [], []]
-                db.session.add(sub)
-                db.session.commit()
+                sub.leitner_boxes = {}
 
-            # Load list of 5 highest-prioirity word pair IDs to learn from
-            # Leitner boxes. TODO: Make the quiz length variable.
-            flat_list = [id for box in sub.leitner_boxes for id in box]
-            session["to_test"] = flat_list[:5]
+            # Update leitner boxes, checking for new and deleted words in list
+            lboxes = sub.leitner_boxes.copy()
+            database_word_ids = [word_pair.id for word_pair in table.words] 
+            for word_id in database_word_ids:
+                if word_id not in lboxes:
+                    lboxes[word_id] = 0
+            for word_id in list(lboxes.keys()):
+                if word_id not in database_word_ids:
+                    del lboxes[word_id]
 
-            # Set up dictionary to record test score
-            # TODO: Actually record which words were right and wrong
-            session["test_score"] = {"correct": 0, "total": 0}
+            sub.leitner_boxes = lboxes
+            db.session.add(sub)
+            db.session.commit()
+
+            # Load list of "QUIZ_LENGTH" highest-prioirity word pair IDs to learn from
+            # Leitner boxes. 
+
+            word_ids = list(lboxes.keys())
+            word_ids.sort(key=lambda id: lboxes[id])
+            word_ids = word_ids[:QUIZ_LENGTH]
+
+            quiz["total_count"] = len(word_ids)
+            quiz["word_ids"] = word_ids
+            quiz["to_test"] = word_ids.copy()
+            quiz["right_list"] = []
+            quiz["wrong_list"] = []
+            quiz["right_count"] = 0
+
             return redirect(f"/quiz/{language_name}/{table_name}")
 
         else:
-            if len(session["to_test"]) == 0:
+            quiz = session["quiz"]
+
+            if len(quiz["to_test"]) == 0:
                 # END OF TEST:
-                # Display score
-                correct = session["test_score"]["correct"]
-                total = session["test_score"]["total"]
-                del session["to_test"]
-                del session["test_score"]
+                # Upate Leitner boxes
                 sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
-                # TODO: Update leitner boxes
-                return render_template("results.html", correct=correct,
-                        total=total)
+                lboxes = sub.leitner_boxes.copy()
+                for word_id in quiz["right_list"]:
+                    # Move to next box along
+                    lboxes[word_id] += 1
+                    #TODO: Limit number of boxes?
+                for word_id in quiz["wrong_list"]:
+                    # Move back to first box
+                    lboxes[word_id] = 0
+                sub.leitner_boxes = lboxes 
+                # Tidy up
+                db.session.commit()
+                del session["quiz"]
+                # Display results
+                return render_template("results.html", quiz=quiz, sub=sub)
 
             # Otherwise ask user to translate current first word in the list.
-            word_pair_id = session["to_test"][0]
-            word_pair = WordPair.query.filter_by(id=word_pair_id).first()
+            word_id = quiz["to_test"][0]
+            word_pair = WordPair.query.filter_by(id=word_id).first()
             return render_template("quiz.html", table=table,
                     word_pair=word_pair)
 
     elif request.method == "POST":
-        word_pair_id = session["to_test"][0]
-        word_pair = WordPair.query.filter_by(id=word_pair_id).first()
+        quiz = session["quiz"]
+        word_id = quiz["to_test"][0]
+        word_pair = WordPair.query.filter_by(id=word_id).first()
         answer = request.form["answer"]
 
         # TODO: Use fuzzywuzzy to allow for typos
@@ -222,13 +255,12 @@ def quiz(language_name, table_name):
         # TODO: Decide capitalization policy
         if word_pair.translation.lower() == answer.lower():
             flash("Correct!")
-            session["test_score"]["correct"] += 1
-            session["test_score"]["total"] += 1
+            quiz["right_list"].append(word_id)
+            quiz["right_count"] += 1
         else:
             flash(f"Wrong! The correct translation is {word_pair.translation}.")
-            session["test_score"]["total"] += 1
-
-        session["to_test"] = session["to_test"][1:]
+            quiz["wrong_list"].append(word_id)
+        quiz["to_test"] = quiz["to_test"][1:]
         return redirect(f"/quiz/{language_name}/{table_name}")
 
 
