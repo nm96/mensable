@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block body %}
-<h1>
-	Congrats, you scored {{ results.right_count }} out of {{ results.total_count }}.
-</h1>
+<h3>
+	{{ results.headline }}
+</h3>
 {% if results["wrong_list"] %}
 <h5>
 	Incorrect:

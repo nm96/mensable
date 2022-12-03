@@ -128,4 +128,7 @@ def test_quiz(auth, client):
     route = '/quiz/Testese/Testtable'
     client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
         'test'})
+    # Quiz should start with a redirect.
+    assert client.get(route).status_code == 302
+    # Get again to start the quiz.
     assert client.get(route).status_code == 200

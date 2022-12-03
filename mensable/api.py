@@ -195,7 +195,6 @@ def view_table(language_name, table_name):
     """View an existing word table"""
     user = User.query.filter_by(id=session["user_id"]).first()
     table = Table.query.filter_by(name=table_name).first()
-    learners = [sub.learner for sub in table.subscriptions]
 
     if not table:
         flash(f"Table {table_name} does not exist")
@@ -205,6 +204,7 @@ def view_table(language_name, table_name):
         flash(f"Table {table_name} is empty, try editing it here")
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
+    learners = [sub.learner for sub in table.subscriptions]
     return render_template("view_table.html", table=table, user=user, learners=learners)
 
 
@@ -235,7 +235,7 @@ def languages():
 def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
-    QUIZ_LENGTH = 5
+    QUIZ_LENGTH = 10
     table = Table.query.filter_by(name=table_name).first()
 
     if request.method == "GET":
@@ -364,9 +364,28 @@ def results(language_name, table_name):
                 quiz["wrong_list"]]
         results["right_list"] = [WordPair.query.filter_by(id=id).first() for id in
                 quiz["right_list"]]
+        results["percentage_score"] = int(results["right_count"] /
+                results["total_count"] * 100)
+        if results["percentage_score"] > 90:
+            headline = "Congrats! "
+        elif results["percentage_score"] > 60:
+            headline = "Not bad! "
+        else:
+            headline = "Better luck next time - "
+        
+        headline += f"""
+                   you scored {results['right_count']}/{results['total_count']}
+                   ({results['percentage_score']}%)
+                   """
+        results["headline"] = headline
 
         # Save full details of most recent results to the subscription
         sub.last_quiz_results = results
+        sub.quiz_attempts += 1
+        sub.total_questions += results["total_count"]
+        sub.total_right += results["right_count"]
+        sub.average_percentage_score = int(sub.total_right /
+                sub.total_questions * 100)
         db.session.commit()
 
     # Display results

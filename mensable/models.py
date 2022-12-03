@@ -49,6 +49,10 @@ class Subscription(db.Model):
     id = db.Column("id", db.Integer, primary_key=True)
     leitner_boxes = db.Column(db.PickleType)
     last_quiz_results = db.Column(db.PickleType)
+    quiz_attempts = db.Column(db.Integer)
+    total_questions = db.Column(db.Integer)
+    total_right = db.Column(db.Integer)
+    average_percentage_score = db.Column(db.Integer)
     learner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
 
@@ -57,6 +61,10 @@ class Subscription(db.Model):
         self.learner_id = learner.id
         self.table_id = table.id
         self.leitner_boxes = {}
+        self.last_quiz_results = {}
+        self.quiz_attempts = 0
+        self.total_questions = 0
+        self.total_right = 0
 
 
 # Helper table for keeping track of which WordPairs are in which Tables
