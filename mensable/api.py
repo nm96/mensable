@@ -231,7 +231,7 @@ def quiz(language_name, table_name):
     if request.method == "GET":
         user = User.query.filter_by(id=session["user_id"]).first()
 
-        if "quiz" not in session:
+        if "quiz" not in session or session["quiz"]["table_id"] != table.id:
             # Create quiz dictionary session variable.
             session["quiz"] = {}
             quiz = session["quiz"] # (alias)
@@ -267,6 +267,7 @@ def quiz(language_name, table_name):
             quiz["right_list"] = []
             quiz["wrong_list"] = []
             quiz["right_count"] = 0
+            quiz["table_id"] = table.id 
             
             # Start quiz by redirecting back to the route.
             return redirect(f"/quiz/{language_name}/{table_name}")
