@@ -276,22 +276,7 @@ def quiz(language_name, table_name):
             quiz = session["quiz"]
 
             if len(quiz["to_test"]) == 0:
-                # END OF TEST:
-                # Upate Leitner boxes
-                sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
-                lboxes = sub.leitner_boxes.copy()
-                for word_id in quiz["right_list"]:
-                    # Move to next box along
-                    lboxes[word_id] += 1
-                for word_id in quiz["wrong_list"]:
-                    # Move back to first box
-                    lboxes[word_id] = 0
-                sub.leitner_boxes = lboxes 
-                # Tidy up
-                db.session.commit()
-                del session["quiz"]
-                # Display results
-                return render_template("results.html", quiz=quiz, sub=sub)
+                return redirect(f"/results/{language_name}/{table_name}")
 
             # Otherwise ask user to translate current first word in the list.
             word_id = quiz["to_test"][0]
@@ -325,15 +310,37 @@ def quiz(language_name, table_name):
 
 def compare_strings(s1, s2):
     """Soft string comparison, converts to lower case and removes whitespace,
-    allows for typos up to a Levenshtein distance of 1"""
+    allows for typos up to a Levenshtein distance of 2"""
     s1 = s1.lower()
     s2 = s2.lower()
     s1 = s1.replace(" ", "")
     s2 = s2.replace(" ", "")
-    if Levenshtein.distance(s1, s2) <= 1:
+    if Levenshtein.distance(s1, s2) <= 2:
         return True
     return False
 
+
+@bp.route("/results/<language_name>/<table_name>", methods=["GET"])
+@login_required
+def results(language_name, table_name):
+    user = User.query.filter_by(id=session["user_id"]).first()
+    table = Table.query.filter_by(name=table_name).first()
+    sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
+    quiz = session["quiz"]
+    # Upate Leitner boxes
+    lboxes = sub.leitner_boxes.copy()
+    for word_id in quiz["right_list"]:
+        # Move to next box along
+        lboxes[word_id] += 1
+    for word_id in quiz["wrong_list"]:
+        # Move back to first box
+        lboxes[word_id] = 0
+    sub.leitner_boxes = lboxes 
+    # Tidy up
+    db.session.commit()
+    del session["quiz"]
+    # Display results
+    return render_template("results.html", quiz=quiz, sub=sub)
 
 
 @bp.route("/unsubscribe/<language_name>/<table_name>", methods=["GET", "POST"])
