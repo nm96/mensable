@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block body %}
+<h3>
+	Are you sure you want to unsubscribe from {{ table.name }}?
+</h3>
+<h4>
+	Your learning progress will be deleted.
+</h4>
+
+
+<form action="/unsubscribe/{{ table.language.name }}/{{ table.name }}" method="post">
+	<button autofocus class="btn btn-warning" type="submit">Yes</button>
+</form>
+	
+{% endblock %}

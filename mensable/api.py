@@ -183,7 +183,9 @@ def delete_table(language_name, table_name):
 @login_required
 def view_table(language_name, table_name):
     """View an existing word table"""
+    user = User.query.filter_by(id=session["user_id"]).first()
     table = Table.query.filter_by(name=table_name).first()
+    learners = [sub.learner for sub in table.subscriptions]
 
     if not table:
         flash(f"Table {table_name} does not exist")
@@ -193,7 +195,7 @@ def view_table(language_name, table_name):
         flash(f"Table {table_name} is empty, try editing it here")
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
-    return render_template("view_table.html", table=table)
+    return render_template("view_table.html", table=table, user=user, learners=learners)
 
 
 @bp.route("/tables")
@@ -330,4 +332,22 @@ def compare_strings(s1, s2):
     if Levenshtein.distance(s1, s2) <= 1:
         return True
     return False
+
+
+
+@bp.route("/unsubscribe/<language_name>/<table_name>", methods=["GET", "POST"])
+@login_required
+def unsubscribe(language_name, table_name):
+    """Unsubscribe from a table and delete learning data."""
+    user = User.query.filter_by(id=session["user_id"]).first()
+    table = Table.query.filter_by(name=table_name).first()
+    sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
+
+    if request.method == "GET":
+        return render_template("unsubscribe.html", user=user, table=table)
+
+    elif request.method == "POST":
+        db.session.delete(sub)
+        db.session.commit()
+        return redirect(f"/tables/{language_name}")
 
