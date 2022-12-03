@@ -2,17 +2,39 @@
 
 {% block body %}
 <h1>
-	Congrats, you scored {{ quiz.right_count }} out of {{ quiz.total_count }}.
+	Congrats, you scored {{ results.right_count }} out of {{ results.total_count }}.
 </h1>
+{% if results["wrong_list"] %}
 <h5>
-	Correct: {{ quiz.right_list }}
+	Incorrect:
 </h5>
+<table class="table">
+	<tbody>
+		{% for word_pair in results["wrong_list"] %}		
+		<tr>
+			<td class="text-start">{{ word_pair.foreignWord }}</td>
+			<td class="text-start">{{ word_pair.translation }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>	
+{% endif %}
+{% if results["right_list"] %}
 <h5>
-	Incorrect: {{ quiz.wrong_list }}
+	Correct:
 </h5>
-<p>
-	{{ sub.leitner_boxes }}
-</p>
+<table class="table">
+	<tbody>
+		{% for word_pair in results["right_list"] %}		
+		<tr>
+			<td class="text-start">{{ word_pair.foreignWord }}</td>
+			<td class="text-start">{{ word_pair.translation }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>	
+{% endif %}
+
 <a autofocus class="btn btn-primary" href="/quiz/{{ sub.table.language.name }}/{{ sub.table.name }}" role="button">Continue</a>
 	
 {% endblock %}

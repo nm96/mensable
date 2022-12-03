@@ -10,6 +10,13 @@ from mensable.auth import login_required
 bp = Blueprint("api", __name__)
 
 
+def visible_print(s):
+    """Hack function for printing errors in such a way that it's readable in
+    the flask log."""
+    ps = "#"*80 + "\n"*2 + s + "\n"*2 + "_"*80
+    print(ps, file=sys.stderr)
+
+
 @bp.route("/")
 @login_required
 def home():
@@ -74,6 +81,9 @@ def create_table(language_name):
         table.creator_id = user.id
         table.language_id = language.id
         db.session.add(table)
+        db.session.commit()
+
+        # Now create a subscription to this table.
         sub = Subscription(user, table)
         db.session.add(sub)
         db.session.commit()
@@ -323,24 +333,44 @@ def compare_strings(s1, s2):
 @bp.route("/results/<language_name>/<table_name>", methods=["GET"])
 @login_required
 def results(language_name, table_name):
+    # Load relevant objects
     user = User.query.filter_by(id=session["user_id"]).first()
     table = Table.query.filter_by(name=table_name).first()
     sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
-    quiz = session["quiz"]
-    # Upate Leitner boxes
-    lboxes = sub.leitner_boxes.copy()
-    for word_id in quiz["right_list"]:
-        # Move to next box along
-        lboxes[word_id] += 1
-    for word_id in quiz["wrong_list"]:
-        # Move back to first box
-        lboxes[word_id] = 0
-    sub.leitner_boxes = lboxes 
-    # Tidy up
-    db.session.commit()
-    del session["quiz"]
+
+    if "quiz" not in session:
+        results = sub.last_quiz_results
+
+    else:
+        quiz = session["quiz"]
+
+        # Upate Leitner boxes
+        lboxes = sub.leitner_boxes.copy()
+        for word_id in quiz["right_list"]:
+            # Move to next box along
+            lboxes[word_id] += 1
+        for word_id in quiz["wrong_list"]:
+            # Move back to first box
+            lboxes[word_id] = 0
+        sub.leitner_boxes = lboxes 
+
+        # Tidy up
+        db.session.commit()
+        del session["quiz"]
+
+        # Convert quiz data into more detailed results dictionary
+        results = quiz.copy()
+        results["wrong_list"] = [WordPair.query.filter_by(id=id).first() for id in
+                quiz["wrong_list"]]
+        results["right_list"] = [WordPair.query.filter_by(id=id).first() for id in
+                quiz["right_list"]]
+
+        # Save full details of most recent results to the subscription
+        sub.last_quiz_results = results
+        db.session.commit()
+
     # Display results
-    return render_template("results.html", quiz=quiz, sub=sub)
+    return render_template("results.html", results=results, sub=sub)
 
 
 @bp.route("/unsubscribe/<language_name>/<table_name>", methods=["GET", "POST"])

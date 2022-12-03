@@ -48,10 +48,12 @@ class Subscription(db.Model):
     their knowledge is via the Leitner system."""
     id = db.Column("id", db.Integer, primary_key=True)
     leitner_boxes = db.Column(db.PickleType)
+    last_quiz_results = db.Column(db.PickleType)
     learner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
 
     def __init__(self, learner, table):
+        # TODO: Handle potential error here where table.id is not defined.
         self.learner_id = learner.id
         self.table_id = table.id
         self.leitner_boxes = {}
