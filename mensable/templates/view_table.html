@@ -8,8 +8,19 @@
 		{% if table.creator_id == user.id %}
 			<a class="btn btn-info" href="/edit_table/{{ table.language.name }}/{{ table.name }}" role="button">Edit Table</a>
 		{% endif %}
-		{% if user in learners %}
+		{% if sub != None and sub.quiz_attempts > 1 %}
 			<a class="btn btn-warning" href="/unsubscribe/{{ table.language.name }}/{{ table.name }}" role="button">Unsubscribe</a>
+			<p>
+				You have attempted a quiz on this table {{ sub.quiz_attempts }} times, with an average score of {{ sub.average_percentage_score }}%.
+			</p>
+			<p>
+				In your last attempt you scored {{ sub.last_quiz_results.percentage_score }}%.
+			</p>
+		{% elif sub!= None and sub.quiz_attempts == 1 %}
+			<a class="btn btn-warning" href="/unsubscribe/{{ table.language.name }}/{{ table.name }}" role="button">Unsubscribe</a>
+			<p>
+				You have attempted a quiz on this table {{ sub.quiz_attempts }} time, with a score of {{ sub.average_percentage_score }}%.
+			</p>
 		{% endif %}
 			
 	</div>

@@ -204,8 +204,8 @@ def view_table(language_name, table_name):
         flash(f"Table {table_name} is empty, try editing it here")
         return redirect(f"/edit_table/{language_name}/{table_name}")
 
-    learners = [sub.learner for sub in table.subscriptions]
-    return render_template("view_table.html", table=table, user=user, learners=learners)
+    sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
+    return render_template("view_table.html", table=table, user=user, sub=sub)
 
 
 @bp.route("/tables")
