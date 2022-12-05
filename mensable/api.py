@@ -3,6 +3,7 @@ import os
 import csv
 import Levenshtein
 import sys
+from datetime import date
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -22,7 +23,9 @@ def visible_print(s):
 def home():
     """Render homepage"""
     user = User.query.filter_by(id=session["user_id"]).first()
-    return render_template("home.html", user=user)
+    subs = user.subscriptions
+    subs.sort(key=lambda sub: sub.last_quiz_date)
+    return render_template("home.html", user=user, subs=subs)
 
 
 @bp.route("/create_language", methods=["GET", "POST"])
@@ -235,7 +238,7 @@ def languages():
 def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
-    QUIZ_LENGTH = 10
+    QUIZ_LENGTH = 3 # TODO: Increase this when done testing.
     table = Table.query.filter_by(name=table_name).first()
 
     if request.method == "GET":
@@ -386,6 +389,7 @@ def results(language_name, table_name):
         sub.total_right += results["right_count"]
         sub.average_percentage_score = int(sub.total_right /
                 sub.total_questions * 100)
+        sub.last_quiz_date = date.today()
         db.session.commit()
 
     # Display results

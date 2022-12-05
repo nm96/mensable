@@ -47,14 +47,16 @@ class Subscription(db.Model):
     """Tracks which Tables a User is learning and what the current state of
     their knowledge is via the Leitner system."""
     id = db.Column("id", db.Integer, primary_key=True)
+    learner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
     leitner_boxes = db.Column(db.PickleType)
     last_quiz_results = db.Column(db.PickleType)
     quiz_attempts = db.Column(db.Integer)
     total_questions = db.Column(db.Integer)
     total_right = db.Column(db.Integer)
     average_percentage_score = db.Column(db.Integer)
-    learner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    table_id = db.Column(db.Integer, db.ForeignKey('table.id'))
+    last_quiz_date = db.Column(db.String)
+    subscription_date = db.Column(db.String, default=date.today)
 
     def __init__(self, learner, table):
         # TODO: Handle potential error here where table.id is not defined.

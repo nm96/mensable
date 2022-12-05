@@ -10,10 +10,10 @@
 		</h2>
 	</div>
 	<table class="table">
-		{% for sub in user.subscriptions %}
+		{% for sub in subs %}
 		<tr>
-			<td class="text-start"><a href="/view_table/{{ sub.table.language.name }}/{{ sub.table.name }}">{{ sub.table.name }}</a></td>
-			<td class="text-start">({{ sub.table.language.name }})</td>
+			<td class="text-start"><a href="/view_table/{{ sub.table.language.name }}/{{ sub.table.name }}">{{ sub.table.name }}</a> ({{ sub.table.language.name }})</td>
+			<td class="text-start">Last quizzed on {{ sub.last_quiz_date }}</td>
 		</tr>
 		{% endfor %}
 	</table>
