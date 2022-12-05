@@ -17,6 +17,8 @@ def app():
         language = Language('Testese')
         db.session.add(language)
         # Add a dummy table
+        # TODO: Use the actual API route here rather than trying to reproduce
+        # the functionality!
         table = Table('Testtable')
         table.creator_id = 1
         table.language_id = 1
@@ -32,15 +34,19 @@ def client(app):
 
 
 class AuthActions(object):
+    # Define default username and password
+    username = "testuser"
+    password = "testpwd"
+
     def __init__(self, client):
         self._client = client
 
-    def register(self, username="testuser", password="testpwd",
-            confirmation="testpwd"):
+    def register(self, username=username, password=password,
+            confirmation=password):
         return self._client.post( "/register", data={"username": username,
             "password": password, "confirmation": confirmation})
 
-    def login(self, username='testuser', password='testpwd'):
+    def login(self, username=username, password=password):
         return self._client.post( '/login', data={'username': username,
             'password': password})
 
