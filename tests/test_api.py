@@ -176,11 +176,50 @@ def test_languages_and_tables(client, auth, api):
     assert client.get(f"/tables/{api.language_name}").status_code == 200
 
 
-def test_quiz(client, auth, api):
+def test_quiz(app, client, auth, api):
     auth.login()
     route = f"/quiz/{api.language_name}/{api.table_name}"
+    # Create table
     api.add_full_stack()
+
+    # Log in as new user to simulate subscription
+    auth.logout()
+    auth.register("new_user", "123", "123")
+
     # Quiz should start with a redirect.
     assert client.get(route).status_code == 302
     # Get again to start the quiz.
     assert client.get(route).status_code == 200
+    # Answer the only question in the quiz (correctly as per default)
+    response = api.quiz_response()
+    results_route = f"/results/{api.language_name}/{api.table_name}"
+    assert client.get(route).headers['Location'] == results_route
+    # Now go to results page to finish off the quiz
+    with client:
+        assert client.get(results_route).status_code == 200
+        assert "quiz" not in session
+
+    # Now edit the table and simulate an incorrect answer.
+    auth.logout()
+    auth.login()
+    new_foreign_word = "Bing"
+    new_translation = "Bong"
+
+    # Delete original word
+    with app.app_context():
+        word_pair = WordPair.query.filter_by(foreignWord=api.foreignWord).first()
+    response = client.post(f"/delete_word/{api.language_name}/{api.table_name}",
+            data={'word_pair_id': word_pair.id})
+
+    # Add new word
+    api.add_word_pair(new_foreign_word, new_translation)
+
+    auth.logout()
+    auth.login("new_user", "123")
+
+    assert client.get(route).status_code == 302
+    assert client.get(route).status_code == 200
+    # Answer the only question in the quiz, incorrectly
+    response = api.quiz_response("Blarb")
+    assert client.get(route).headers['Location'] == f"/results/{api.language_name}/{api.table_name}"
+

@@ -27,7 +27,7 @@ def test_login(client, auth):
     invalid_logins = [('','testpwd'),
                       ('testuser', ''), 
                       ('notuser', 'notpwd'),
-                      ('testuser', 'wrongpwd')]
+                      (f"{auth.username}", 'wrongpwd')]
 
     for login in invalid_logins:
         response = auth.login(*login)

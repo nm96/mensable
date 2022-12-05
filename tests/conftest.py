@@ -99,6 +99,11 @@ class APIActions(object):
                            table_name=table_name, 
                            language_name=language_name)
         
+    def quiz_response(self, answer=translation, table_name=table_name,
+            language_name=language_name):
+        route =  f"/quiz/{language_name}/{table_name}"
+        return self._client.post(route, data={"answer": answer})
+
 
 @pytest.fixture
 def api(client):
