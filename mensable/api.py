@@ -19,8 +19,9 @@ def home():
     subs = user.subscriptions
     subs.sort(key=lambda sub: sub.last_quiz_date)
     languages = set(sub.table.language for sub in subs)
+    today = date.today()
     return render_template("home.html", user=user, subs=subs,
-            languages=languages)
+            languages=languages, date=today)
 
 
 @bp.route("/create_language", methods=["GET", "POST"])

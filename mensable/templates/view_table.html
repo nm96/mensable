@@ -1,29 +1,30 @@
 {% extends "base.html" %}
 
 {% block body %}
-	<div class="container-fluid">
+	<div class="container-fluid mb-3 text-center">
 		<h2>{{ table.name }}</h2>
 		<p>Created by {{ table.creator.name }} on {{ table.created }}</p>
-		<a class="btn btn-primary" href="/quiz/{{ table.language.name }}/{{ table.name }}" role="button">Quiz</a>
+		<a autofocus class="btn btn-primary mb-3" href="/quiz/{{ table.language.name }}/{{ table.name }}" role="button">Quiz</a>
 		{% if table.creator_id == user.id %}
-			<a class="btn btn-info" href="/edit_table/{{ table.language.name }}/{{ table.name }}" role="button">Edit Table</a>
+		<a class="btn btn-info mb-3" href="/edit_table/{{ table.language.name }}/{{ table.name }}" role="button">Edit Table</a>
 		{% endif %}
 		{% if sub != None and sub.quiz_attempts > 1 %}
-			<a class="btn btn-warning" href="/unsubscribe/{{ table.language.name }}/{{ table.name }}" role="button">Unsubscribe</a>
-			<p>
-				You have attempted a quiz on this table {{ sub.quiz_attempts }} times, with an average score of {{ sub.average_percentage_score }}%.
-			</p>
-			<p>
-				In your last attempt you scored {{ sub.last_quiz_results.percentage_score }}%.
-			</p>
+		<a class="btn btn-warning mb-3" href="/unsubscribe/{{ table.language.name }}/{{ table.name }}" role="button">Unsubscribe</a>
+		<p>
+			You have attempted a quiz on this table {{ sub.quiz_attempts }} times, with an average score of {{ sub.average_percentage_score }}%.
+		</p>
+		<p>
+			In your last attempt on {{ sub.last_quiz_date }}, you scored {{ sub.last_quiz_results.percentage_score }}%.
+		</p>
 		{% elif sub!= None and sub.quiz_attempts == 1 %}
-			<a class="btn btn-warning" href="/unsubscribe/{{ table.language.name }}/{{ table.name }}" role="button">Unsubscribe</a>
-			<p>
-				You have attempted a quiz on this table {{ sub.quiz_attempts }} time, with a score of {{ sub.average_percentage_score }}%.
-			</p>
+		<a class="btn btn-warning mb-3" href="/unsubscribe/{{ table.language.name }}/{{ table.name }}" role="button">Unsubscribe</a>
+		<p>
+			You have attempted a quiz on this table once on {{ sub.last_quiz_date }}, with a score of {{ sub.average_percentage_score }}%.
+		</p>
 		{% endif %}
 			
 	</div>
+	<div class="container mb-3">
 	<table class="table">
 		<thead>
 			<tr>
@@ -40,4 +41,5 @@
 			{% endfor %}
 		</tbody>
 	</table>	
+	</div>
 {% endblock %}

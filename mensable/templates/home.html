@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 
 {% block body %}
-	<div class="container-fluid">
+	<div class="container-fluid mb-3 text-center">
 		<h1>
-			{{ user.name }}
+			{{ user.name }}'s mensable home | {{ date }}
 		</h2>
+	</div>
+	{% if subs %}
+	<div class="container-fluid mb-3">
 		<h3>
 			Learning:
 		</h3>
@@ -12,12 +15,13 @@
 		<a class="btn btn-danger" href="/tables/{{ language.name }}">{{ language.name }}</a>
 		{% endfor %}
 		<br>
+	</div>
+	<div class="container-fluid mb-3">
 		<h3>
 			In tables:
 		</h2>
-	</div>
 	<table class="table">
-		{% for sub in subs %}
+		{% for sub in subs if sub != None %}
 		<tr>
 			<td class="text-start"><a class="btn btn-primary" href="/view_table/{{ sub.table.language.name }}/{{ sub.table.name }}">{{ sub.table.name }}</a></td>
 			<td class="text-start">({{ sub.table.language.name }})</td>
@@ -25,4 +29,16 @@
 		</tr>
 		{% endfor %}
 	</table>
+	</div>
+	{% else %}
+	<div class="container-fluid mb-3 text-center">
+		<h5>
+		Browse languages and tables to learn here:
+		</h5>
+			<br>
+			<a class="btn btn-danger mb-3" href="/languages">Languages</a>
+			<br>
+			<a class="btn btn-primary mb-3" href="/tables">Tables</a>
+	</div>
+	{% endif %}
 {% endblock %}

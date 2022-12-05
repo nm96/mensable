@@ -67,6 +67,7 @@ class Subscription(db.Model):
         self.quiz_attempts = 0
         self.total_questions = 0
         self.total_right = 0
+        self.last_quiz_date = date.today()
 
 
 # Helper table for keeping track of which WordPairs are in which Tables

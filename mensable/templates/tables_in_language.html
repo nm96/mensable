@@ -1,19 +1,28 @@
 {% extends "base.html" %}
 
 {% block body %}
-	<div class="container-fluid">
+	<div class="container-fluid mb-3 text-center">
 		<h2>
 			{{ language.name }} Tables
 		</h2>
 	</div>	
+	<div class="container mb-3">
 	<table class="table">
+		<thead>
+			<tr>
+				<th class="text-start">Name</th>
+				<th class="text-start">Subscriptions</th>
+			</tr>
+		</thead>
 		{% for table in tables %}
 		<tr>
 			<td class="text-start"><a class="btn btn-primary" href="/view_table/{{ language.name }}/{{ table.name }}">{{ table.name }}</a></td>
+			<td class="text-start">{{ table.subscriptions | length }}</td>
 		</tr>
 		{% endfor %}
 	</table>
-	<div class="mb-3">
+	</div>	
+	<div class="mb-3 text-center">
 		<a class="btn btn-secondary" href="/create_table/{{ language.name }}" role="button">Create Table</a>
 	</div>
 {% endblock %}

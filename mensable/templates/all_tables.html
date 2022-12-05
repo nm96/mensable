@@ -1,17 +1,27 @@
 {% extends "base.html" %}
 
 {% block body %}
-	<div class="container-fluid">
+	<div class="container-fluid mb-3 text-center">
 		<h2>
 			All Tables
 		</h2>
 	</div>	
+	<div class="container mb-3">
 	<table class="table">
+		<thead>
+			<tr>
+				<th class="text-start">Name</th>
+				<th class="text-start">Subscriptions</th>
+				<th class="text-start">Language</th>
+			</tr>
+		</thead>
 		{% for table in tables %}
 		<tr>
 			<td class="text-start"><a class="btn btn-primary" href="/view_table/{{ table.language.name }}/{{ table.name }}">{{ table.name }}</a></td>
-			<td class="text-start">({{ table.language.name }})</td>
+			<td class="text-start">{{ table.subscriptions | length }}</td>
+			<td class="text-start"><a class="btn btn-light" href="/tables/{{ table.language.name }}">{{ table.language.name }}</a></td>
 		</tr>
 		{% endfor %}
 	</table>
+	</div>	
 {% endblock %}
