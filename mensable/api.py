@@ -11,13 +11,6 @@ from mensable.auth import login_required
 bp = Blueprint("api", __name__)
 
 
-def visible_print(s):
-    """Hack function for printing errors in such a way that it's readable in
-    the flask log."""
-    ps = "#"*80 + "\n"*2 + s + "\n"*2 + "_"*80
-    print(ps, file=sys.stderr)
-
-
 @bp.route("/")
 @login_required
 def home():

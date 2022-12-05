@@ -179,54 +179,85 @@ def test_languages_and_tables(client, auth, api):
 def test_quiz(app, client, auth, api):
     auth.register()
     route = f"/quiz/{api.language_name}/{api.table_name}"
-    # Create table
-    api.add_full_stack()
 
-    # Log in as new user to simulate subscription
-    auth.logout()
-    auth.register("new_user", "123", "123")
+    # Create table with two word pairs: default and foo/bar
+    api.add_full_stack()
+    api.add_word_pair("Foo", "Bar")
 
     # Quiz should start with a redirect.
     assert client.get(route).status_code == 302
     # Get again to start the quiz.
     assert client.get(route).status_code == 200
-    # Answer the only question in the quiz (correctly as per default)
-    response = api.quiz_response()
+    # Answer the first question in the quiz (correctly as per default)
+    api.quiz_response()
+    assert client.get(route).status_code == 200
+    # Answer the second question incorrectly.
+    api.quiz_response("Dunno")
+    assert client.get(route).status_code == 302
     results_route = f"/results/{api.language_name}/{api.table_name}"
+    # Check for redirect to results and then shcek that session is cleared.
     assert client.get(route).headers["Location"] == results_route
-    # Now go to results page to finish off the quiz
     with client:
         assert client.get(results_route).status_code == 200
         assert "quiz" not in session
-
-    # Now edit the table and simulate an incorrect answer.
-    auth.logout()
-    auth.login()
-    new_foreign_word = "Bing"
-    new_translation = "Bong"
-
-    # Delete original word
+        # Refresh results page to check persistence
+        assert client.get(results_route).status_code == 200
+        
+    # Now edit the table, deleting both words and adding a new one
     with app.app_context():
-        word_pair = WordPair.query.filter_by(foreignWord=api.foreignWord).first()
-    response = client.post(f"/delete_word/{api.language_name}/{api.table_name}",
-            data={"word_pair_id": word_pair.id})
+        word_pair_1 = WordPair.query.filter_by(foreignWord=api.foreignWord).first()
+        word_pair_2 = WordPair.query.filter_by(foreignWord="Foo").first()
+        client.post(f"/delete_word/{api.language_name}/{api.table_name}",
+                data={"word_pair_id": word_pair_1.id})
+        client.post(f"/delete_word/{api.language_name}/{api.table_name}",
+                data={"word_pair_id": word_pair_2.id})
 
-    # Add new word
-    api.add_word_pair(new_foreign_word, new_translation)
+    api.add_word_pair("Bing", "Bong")
 
-    auth.logout()
-    auth.login("new_user", "123")
-
+    # Start a new quiz
     assert client.get(route).status_code == 302
     assert client.get(route).status_code == 200
-    # Answer the only question in the quiz, incorrectly
-    response = api.quiz_response("Blarb")
+    # Answer the only question in the quiz, correctly
+    response = api.quiz_response("Bong")
     results_route = f"/results/{api.language_name}/{api.table_name}"
     assert client.get(route).headers["Location"] == results_route
     # Now go to results page to finish off the quiz
     with client:
         assert client.get(results_route).status_code == 200
         assert "quiz" not in session
+
+    # Log in as new user and start a quiz to simulate subscription.
+    auth.logout()
+    auth.register("new_user", "123", "123")
+    assert client.get(route).status_code == 302
+    assert client.get(route).status_code == 200
+
+
+def test_results(app, client, auth, api):
+    auth.register()
+    route = f"/results/{api.language_name}/{api.table_name}"
+    # Create table (and therefore the relevant subscription)
+    api.add_full_stack()
+    api.add_word_pair("foo", "bar")
+    api.add_word_pair("baz", "qux")
+
+    # Subscribe to table by starting a quiz
+    client.get(f"/quiz/{api.language_name}/{api.table_name}")
+
+    # Create 'artificial' quiz dictionary
+    quiz = {"word_ids": [1, 2, 3],
+            "total_count": 3,
+            "to_test": [],
+            "right_list": [1, 2],
+            "wrong_list": [3],
+            "right_count": 2,
+            "table_id": 1}
+
+    with client.session_transaction() as session:
+        session["quiz"] = quiz
+        
+    assert "quiz" in session
+    assert client.get(route).status_code == 200
 
 
 def test_unsubscribe(app, client, auth, api):
