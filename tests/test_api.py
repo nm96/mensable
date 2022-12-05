@@ -228,3 +228,19 @@ def test_quiz(app, client, auth, api):
         assert client.get(results_route).status_code == 200
         assert "quiz" not in session
 
+
+def test_unsubscribe(app, client, auth, api):
+    auth.register()
+    api.add_full_stack()
+    route = f"/unsubscribe/{api.language_name}/{api.table_name}"
+    assert client.get(route).status_code == 200
+    with app.app_context():
+        sub = Subscription.query.first()
+    sub_id = sub.id
+    response = client.post(route)
+    assert response.headers["Location"] == f"/tables/{api.language_name}"
+    with app.app_context():
+        sub = Subscription.query.filter_by(id=sub_id).first()
+        assert sub is None
+
+    
