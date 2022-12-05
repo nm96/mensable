@@ -234,7 +234,7 @@ def languages():
 def quiz(language_name, table_name):
     """Test a user's knowledge of the words in a table with a randomized quiz"""
 
-    QUIZ_LENGTH = 3 # TODO: Increase this when done testing.
+    QUIZ_LENGTH = 6
     table = Table.query.filter_by(name=table_name).first()
 
     if request.method == "GET":
