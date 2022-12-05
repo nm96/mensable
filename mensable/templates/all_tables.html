@@ -9,7 +9,7 @@
 	<table class="table">
 		{% for table in tables %}
 		<tr>
-			<td class="text-start"><a href="/view_table/{{ table.language.name }}/{{ table.name }}">{{ table.name }}</a></td>
+			<td class="text-start"><a class="btn btn-primary" href="/view_table/{{ table.language.name }}/{{ table.name }}">{{ table.name }}</a></td>
 			<td class="text-start">({{ table.language.name }})</td>
 		</tr>
 		{% endfor %}

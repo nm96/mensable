@@ -6,14 +6,14 @@
 			{{ language.name }} Tables
 		</h2>
 	</div>	
-	<div class="mb-3">
-		<a class="btn btn-primary" href="/create_table/{{ language.name }}" role="button">Create New</a>
-	</div>
 	<table class="table">
 		{% for table in tables %}
 		<tr>
-			<td class="text-start"><a href="/view_table/{{ language.name }}/{{ table.name }}">{{ table.name }}</a></td>
+			<td class="text-start"><a class="btn btn-primary" href="/view_table/{{ language.name }}/{{ table.name }}">{{ table.name }}</a></td>
 		</tr>
 		{% endfor %}
 	</table>
+	<div class="mb-3">
+		<a class="btn btn-secondary" href="/create_table/{{ language.name }}" role="button">Create Table</a>
+	</div>
 {% endblock %}

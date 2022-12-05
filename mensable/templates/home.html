@@ -6,13 +6,21 @@
 			{{ user.name }}
 		</h2>
 		<h3>
-			Your tables:
+			Learning:
+		</h3>
+		{% for language in languages %}
+		<a class="btn btn-danger" href="/tables/{{ language.name }}">{{ language.name }}</a>
+		{% endfor %}
+		<br>
+		<h3>
+			In tables:
 		</h2>
 	</div>
 	<table class="table">
 		{% for sub in subs %}
 		<tr>
-			<td class="text-start"><a href="/view_table/{{ sub.table.language.name }}/{{ sub.table.name }}">{{ sub.table.name }}</a> ({{ sub.table.language.name }})</td>
+			<td class="text-start"><a class="btn btn-primary" href="/view_table/{{ sub.table.language.name }}/{{ sub.table.name }}">{{ sub.table.name }}</a></td>
+			<td class="text-start">({{ sub.table.language.name }})</td>
 			<td class="text-start">Last quizzed on {{ sub.last_quiz_date }}</td>
 		</tr>
 		{% endfor %}

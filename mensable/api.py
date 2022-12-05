@@ -18,7 +18,9 @@ def home():
     user = User.query.filter_by(id=session["user_id"]).first()
     subs = user.subscriptions
     subs.sort(key=lambda sub: sub.last_quiz_date)
-    return render_template("home.html", user=user, subs=subs)
+    languages = set(sub.table.language for sub in subs)
+    return render_template("home.html", user=user, subs=subs,
+            languages=languages)
 
 
 @bp.route("/create_language", methods=["GET", "POST"])
