@@ -13,6 +13,8 @@ def test_login_required(client):
 def test_login(client, auth):
     # Check that login page appears on GET.
     assert client.get("/login").status_code == 200
+    auth.register()
+    auth.logout()
     
     # Check that POST redirects appropriately given valid login details.
     response = auth.login()
@@ -52,7 +54,8 @@ def test_register(client, app, auth):
 
     # Check that POST redirects appropriately for invalid registration details.
     invalid_registrations = [(" *)^ ", "newpwd", "newpwd"),
-                             ("testuser", "testpwd", "testpwd"),
+                             (username, password, password),
+                             (username, "newpwd", "newpwd"),
                              ("newuser2", "", ""),
                              ("newuser3", "newpwd", "wrongpwd")]
 
@@ -69,7 +72,7 @@ def test_register(client, app, auth):
 
 def test_logout(client, auth):
     # First log in
-    auth.login()
+    auth.register()
 
     # Then log out and check that no user is registered in the session.
     with client:

@@ -9,12 +9,6 @@ def app():
     app = create_app({"TESTING": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:"})
 
-    with app.app_context():
-        # Add dummy user to temporary test database
-        user = User("testuser", generate_password_hash("testpwd"))
-        db.session.add(user)
-        db.session.commit()
-
     return app
 
 

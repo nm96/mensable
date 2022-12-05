@@ -7,12 +7,12 @@ from mensable.models import *
 
 def test_home(client, auth):
     # Log in and check that home page can be got
-    auth.login()
+    auth.register()
     assert client.get("/").status_code == 200
 
 
 def test_create_language(app, client, auth, api):
-    auth.login()
+    auth.register()
     route = "/create_language"
     assert client.get(route).status_code == 200
 
@@ -38,7 +38,7 @@ def test_create_language(app, client, auth, api):
 
 
 def test_create_table(app, client, auth, api):
-    auth.login()
+    auth.register()
     route = f"/create_table/{api.language_name}"
 
     api.create_language()
@@ -68,7 +68,7 @@ def test_create_table(app, client, auth, api):
 
 def test_edit_table(app, client, auth, api):
     route = f"/edit_table/{api.language_name}/{api.table_name}"
-    auth.login()
+    auth.register()
     api.create_language()
     api.create_table()
     assert client.get(route).status_code == 200
@@ -105,7 +105,7 @@ def test_edit_table(app, client, auth, api):
 
 def test_upload_csv(app, client, auth, api):
     route = f"/upload_csv/{api.language_name}/{api.table_name}"
-    auth.login()
+    auth.register()
     api.create_language()
     api.create_table()
     assert client.get(route).status_code == 200
@@ -119,7 +119,7 @@ def test_upload_csv(app, client, auth, api):
 
 
 def test_delete_word(app, client, auth, api):
-    auth.login()
+    auth.register()
     route = f"/delete_word/{api.language_name}/{api.table_name}"
 
     # Create default word pair
@@ -138,7 +138,7 @@ def test_delete_word(app, client, auth, api):
 
 
 def test_delete_table(app, client, auth, api):
-    auth.login()
+    auth.register()
     route = f"/delete_table/{api.language_name}/{api.table_name}"
     api.add_full_stack()
     assert client.get(route).status_code == 200
@@ -150,7 +150,7 @@ def test_delete_table(app, client, auth, api):
 
 
 def test_view_table(client, auth, api):
-    auth.login()
+    auth.register()
     route = f"/view_table/{api.language_name}/{api.table_name}"
     api.create_language()
 
@@ -169,7 +169,7 @@ def test_view_table(client, auth, api):
 
 
 def test_languages_and_tables(client, auth, api):
-    auth.login()
+    auth.register()
     assert client.get("/languages").status_code == 200
     assert client.get("/tables").status_code == 200
     api.create_language()
@@ -177,7 +177,7 @@ def test_languages_and_tables(client, auth, api):
 
 
 def test_quiz(app, client, auth, api):
-    auth.login()
+    auth.register()
     route = f"/quiz/{api.language_name}/{api.table_name}"
     # Create table
     api.add_full_stack()
@@ -221,5 +221,10 @@ def test_quiz(app, client, auth, api):
     assert client.get(route).status_code == 200
     # Answer the only question in the quiz, incorrectly
     response = api.quiz_response("Blarb")
-    assert client.get(route).headers["Location"] == f"/results/{api.language_name}/{api.table_name}"
+    results_route = f"/results/{api.language_name}/{api.table_name}"
+    assert client.get(route).headers["Location"] == results_route
+    # Now go to results page to finish off the quiz
+    with client:
+        assert client.get(results_route).status_code == 200
+        assert "quiz" not in session
 
