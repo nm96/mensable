@@ -11,79 +11,88 @@ def test_home(client, auth):
     assert client.get('/').status_code == 200
 
 
-def test_create_language(app, auth, client):
-    route = '/create_language'
+def test_create_language(app, client, auth, api):
     auth.login()
+    route = '/create_language'
     assert client.get(route).status_code == 200
 
     # Try a valid new language
-    new_language_name = 'Newese'
-    response = client.post(route, data={'language_name': new_language_name})
-    assert response.headers['Location'] == '/create_table/' + new_language_name
+    language_name = 'Newese'
+    response = api.create_language(language_name)
+    assert response.headers['Location'] == '/create_table/' + language_name
     with app.app_context():
-        language = Language.query.filter_by(name=new_language_name).first()
+        language = Language.query.filter_by(name=language_name).first()
         assert language is not None
 
     # Try an existing langauge
-    response = client.post(route, data={'language_name': 'Testese'})
+    response = api.create_language(language_name)
     assert response.headers['Location'] == route
 
     # Try an invalid language name
-    response = client.post(route, data={'language_name': '  &^%%^% '})
+    language_name = "   *(&(& 9879 (&(&*(&*&*& "
+    response = api.create_language(language_name)
     assert response.headers['Location'] == route
+    with app.app_context():
+        language = Language.query.filter_by(name=language_name).first()
+        assert language is None
 
 
-def test_create_table(app, auth, client):
+def test_create_table(app, client, auth, api):
     auth.login()
+    route = f"/create_table/{api.language_name}"
 
-    # Now use a route where we specify the language
-    route = '/create_table/Testese'
+    api.create_language()
     assert client.get(route).status_code == 200
 
+
     # Try a valid new table
-    response = client.post(route, data={'table_name': 'Newtable'})
-    assert response.headers['Location'] == '/edit_table/Testese/Newtable'
+    table_name = "Newtable"
+    response = api.create_table(table_name)
+    assert response.headers['Location'] == f"/edit_table/{api.language_name}/{table_name}"
     with app.app_context():
-        table = Table.query.filter_by(name='Newtable').first()
+        table = Table.query.filter_by(name=table_name).first()
         assert table is not None
 
     # Try an existing table, check for redirect
-    response = client.post(route, data={'table_name': 'Testtable'})
+    response = api.create_table(table_name)
     assert response.headers['Location'] == route
 
     # Try an invalid table name, check for redirect
-    response = client.post(route, data={'table_name': '%&^&%&%'})
+    table_name = " &**(&(& 9*&(& "
+    response = api.create_table(table_name)
     assert response.headers['Location'] == route
+    with app.app_context():
+        table = Table.query.filter_by(name=table_name).first()
+        assert table is None
 
 
-def test_edit_table(app, auth, client):
-    route = '/edit_table/Testese/Testtable'
+def test_edit_table(app, client, auth, api):
+    route = f"/edit_table/{api.language_name}/{api.table_name}"
     auth.login()
+    api.create_language()
+    api.create_table()
     assert client.get(route).status_code == 200
 
     # Try adding a valid new word
-    response = client.post(route, data={'foreignWord': 'testo', 'translation':
-        'test'})
+    foreignWord, translation = "foo", "bar"
+    response = api.add_word_pair(foreignWord, translation)
     assert response.headers['Location'] == route
     with app.app_context():
-        word_pair = WordPair.query.filter_by(foreignWord='testo').first()
+        word_pair = WordPair.query.filter_by(foreignWord=foreignWord,
+                translation=translation).first()
         assert word_pair is not None
 
-    # Try adding invalid word pairs
-    response = client.post(route, data={'foreignWord': '', 'translation':
-        'test_translation'})
-    assert response.headers['Location'] == route
-    response = client.post(route, data={'foreignWord': 'wordo', 'translation': ''})
-    assert response.headers['Location'] == route
+    invalid_word_pairs = [("", "Nothing"),
+                          ("Nada", ""), 
+                          (foreignWord, "baz")]
 
-    # Try adding a new translation of an existing word, confirm failure
-    response = client.post(route, data={'foreignWord': 'testo', 'translation':
-        'pesto'})
-    assert response.headers['Location'] == route
-    with app.app_context():
-        word_pair = WordPair.query.filter_by(foreignWord='testo',
-                translation="pesto").first()
-        assert word_pair is None
+    for foreignWord, translation in invalid_word_pairs:
+        api.add_word_pair(foreignWord, translation)
+        assert response.headers['Location'] == route
+        with app.app_context():
+            word_pair = WordPair.query.filter_by(foreignWord=foreignWord,
+                    translation=translation).first()
+            assert word_pair is None
 
 
     # Register and log in as a different user, confirm that attempts to edit
@@ -94,84 +103,83 @@ def test_edit_table(app, auth, client):
     assert response.headers['Location'] == "/tables"
 
 
-def test_upload_csv(app, auth, client):
-    route = '/upload_csv/Testese/Testtable'
+def test_upload_csv(app, client, auth, api):
+    route = f"/upload_csv/{api.language_name}/{api.table_name}"
     auth.login()
+    api.create_language()
+    api.create_table()
     assert client.get(route).status_code == 200
     csv_file = FileStorage(stream=open("tests/test_table.csv", "rb"))
     response = client.post(route, data={"csv_file": csv_file})
-    assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+    assert response.headers['Location'] == f"/edit_table/{api.language_name}/{api.table_name}"
     with app.app_context():
-        table = Table.query.filter_by(name="Testtable").first()
+        table = Table.query.filter_by(name=api.table_name).first()
         assert len(table.words) == 2
         # TODO: More thorough / clear testing of csv upload here.
 
 
-def test_delete_word(app, auth, client):
+def test_delete_word(app, client, auth, api):
     auth.login()
-    route = '/delete_word/Testese/Testtable'
+    route = f"/delete_word/{api.language_name}/{api.table_name}"
 
-    # First create a word to delete using /edit_table (TODO - put this in
-    # conftest for consistency?)
-    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
-        'test'})
+    # Create default word pair
+    api.add_full_stack()
+    with app.app_context():
+        word_pair = WordPair.query.filter_by(foreignWord=api.foreignWord).first()
 
     # Now delete it
-    response = client.post(route, data={'word_pair_id': 1})
-    assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+    response = client.post(route, data={'word_pair_id': word_pair.id})
+    assert response.headers['Location'] == f"/edit_table/{api.language_name}/{api.table_name}"
+
+    # Confirm it is no longer in database
     with app.app_context():
-        word_pair = WordPair.query.filter_by(foreignWord='testo').first()
+        word_pair = WordPair.query.filter_by(foreignWord=api.foreignWord).first()
         assert word_pair is None
 
 
-def test_delete_table(app, auth, client):
+def test_delete_table(app, client, auth, api):
     auth.login()
-    route = '/delete_table/Testese/Testtable'
+    route = f"/delete_table/{api.language_name}/{api.table_name}"
+    api.add_full_stack()
     assert client.get(route).status_code == 200
-    # Put a word in the table (note table itself is created by default in conftest.py)
-    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
-        'test'})
     response = client.post(route)
     assert response.headers['Location'] == '/tables/Testese'
     with app.app_context():
-        table = Table.query.filter_by(name="Testtable").first()
+        table = Table.query.filter_by(name=api.table_name).first()
         assert table is None
 
 
-def test_view_table(auth, client):
+def test_view_table(client, auth, api):
     auth.login()
-    route = '/view_table/Testese/Testtable'
+    route = f"/view_table/{api.language_name}/{api.table_name}"
+    api.create_language()
 
     # First check nonexistent table redirects to home
-    response = client.get('/view_table/Testese/Notatable')
+    response = client.get('/view_table/{api.language_name}/Notatable')
     assert response.headers['Location'] == '/' 
 
     # Then check empty table redirects to edit
+    api.create_table()
     response = client.get(route) 
-    assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+    assert response.headers['Location'] == f"/edit_table/{api.language_name}/{api.table_name}"
 
     # Now populate table and check that page can be viewed
-    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
-        'test'})
+    api.add_word_pair()
     assert client.get(route).status_code == 200
 
 
-def test_tables(auth, client):
-    auth.login()
-    assert client.get('/tables').status_code == 200
-    assert client.get('/tables/Testese').status_code == 200
-
-
-def test_languages(auth, client):
+def test_languages_and_tables(client, auth, api):
     auth.login()
     assert client.get('/languages').status_code == 200
+    assert client.get('/tables').status_code == 200
+    api.create_language()
+    assert client.get(f"/tables/{api.language_name}").status_code == 200
 
 
-def test_quiz(auth, client):
+def test_quiz(client, auth, api):
     auth.login()
-    route = '/quiz/Testese/Testtable'
-    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
-        'test'})
+    route = f"/quiz/{api.language_name}/{api.table_name}"
+    api.add_full_stack()
     # Quiz should start with a redirect.
     assert client.get(route).status_code == 302
     # Get again to start the quiz.
