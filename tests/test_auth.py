@@ -34,20 +34,20 @@ def test_login(client, auth):
         assert response.headers['Location'] == '/login'
 
 
-def test_register(client, app):
+def test_register(client, app, auth):
     # Check that page appears on GET.
     assert client.get('/register').status_code == 200
+    
+    # Define credentials to use.
+    username, password = "new_user", "new_password"
 
-    # Check that POST redirects appropriately for valid registration.
-    response = client.post('/register', data={'username': 'newuser',
-                                              'password': 'newpwd',
-                                              'confirmation': 'newpwd'})
-
+    # Register using fixture
+    response = auth.register(username, password, password)
     assert response.headers['Location'] == '/'
 
     # Check that the user just registered can be found in the database.
     with app.app_context():
-        user = User.query.filter_by(name='newuser').first()
+        user = User.query.filter_by(name=username).first()
         assert user is not None
 
     # Check that POST redirects appropriately for invalid registration details.
@@ -57,10 +57,7 @@ def test_register(client, app):
                              ('newuser3', 'newpwd', 'wrongpwd')]
 
     for registration in invalid_registrations:
-        response = client.post('/register', data={'username': registration[0],
-                                                  'password': registration[1],
-                                                  'confirmation': registration[2]})
-
+        response = auth.register(*registration)
         assert response.headers['Location'] == '/register'
 
     with app.app_context():

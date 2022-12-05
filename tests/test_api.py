@@ -1,5 +1,6 @@
 import pytest
 from flask import session
+from werkzeug.datastructures import FileStorage
 
 from mensable.models import *
 
@@ -75,6 +76,36 @@ def test_edit_table(app, auth, client):
     response = client.post(route, data={'foreignWord': 'wordo', 'translation': ''})
     assert response.headers['Location'] == route
 
+    # Try adding a new translation of an existing word, confirm failure
+    response = client.post(route, data={'foreignWord': 'testo', 'translation':
+        'pesto'})
+    assert response.headers['Location'] == route
+    with app.app_context():
+        word_pair = WordPair.query.filter_by(foreignWord='testo',
+                translation="pesto").first()
+        assert word_pair is None
+
+
+    # Register and log in as a different user, confirm that attempts to edit
+    # redirect to "/tables".
+    auth.logout()
+    auth.register("new_user", "123", "123")
+    response = client.get(route)
+    assert response.headers['Location'] == "/tables"
+
+
+def test_upload_csv(app, auth, client):
+    route = '/upload_csv/Testese/Testtable'
+    auth.login()
+    assert client.get(route).status_code == 200
+    csv_file = FileStorage(stream=open("tests/test_table.csv", "rb"))
+    response = client.post(route, data={"csv_file": csv_file})
+    assert response.headers['Location'] == '/edit_table/Testese/Testtable'
+    with app.app_context():
+        table = Table.query.filter_by(name="Testtable").first()
+        assert len(table.words) == 2
+        # TODO: More thorough / clear testing of csv upload here.
+
 
 def test_delete_word(app, auth, client):
     auth.login()
@@ -92,6 +123,19 @@ def test_delete_word(app, auth, client):
         word_pair = WordPair.query.filter_by(foreignWord='testo').first()
         assert word_pair is None
 
+
+def test_delete_table(app, auth, client):
+    auth.login()
+    route = '/delete_table/Testese/Testtable'
+    assert client.get(route).status_code == 200
+    # Put a word in the table (note table itself is created by default in conftest.py)
+    client.post('/edit_table/Testese/Testtable', data={'foreignWord': 'testo', 'translation':
+        'test'})
+    response = client.post(route)
+    assert response.headers['Location'] == '/tables/Testese'
+    with app.app_context():
+        table = Table.query.filter_by(name="Testtable").first()
+        assert table is None
 
 
 def test_view_table(auth, client):
