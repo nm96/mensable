@@ -2,7 +2,7 @@
 
 *This web app was created as a project for the [Harvard
 CS50x](https://cs50.harvard.edu/x/2022/) course. To try it out, visit
-[mensable.com](TODO: add hosted web app url here) and register for an account.
+[mensable.com](http://mensable.com) and register for an account.
 A video demonstration of the app is available [here](TODO: add video demo url
 here).*
 
@@ -42,13 +42,14 @@ system used to model the users, languages, tables, word pairs and table
 subscriptions. I originally intended to use a conventional SQL engine such as
 psycopg or the CS50 SQL module to interact with the database, but decided after
 some experimentation that the best solution was to use the **SQLAlchemy** Object
-Relational Mapper (ORM) system. This relates the database tables to python
+Relational Mapper (ORM) system. This relates the database tables to Python
 classes (defined in [mensable/models.py](mensable/models.py)) which greatly simplified
 many database operations once I had learned the details of the framework.
 (Although admittedly this comes at the cost of an opportunity to learn more
 about basic SQL.)
 
-TODO: State underlying database type and hosting platform once hosted.
+The app is hosted using **Heroku** with a **PostgreSQL** database - although it
+was developed using a local **sqlite** database for simplicity.
 
 The app is tested using the **pytest** framework, using the scripts contained in
 [tests](/tests). These simulate every operation that user could carry out, and
@@ -62,13 +63,13 @@ The project is divided into the main directory `\mensable` and the `\tests`
 directory, with some configuration files here along with this readme. This
 structure - borrowed from [the flask
 tutorial](https://flask.palletsprojects.com/en/2.2.x/tutorial/) allows the app
-to be run as a python package, which is useful for testing. Below I have
+to be run as a Python package, which is useful for testing. Below I have
 outlined the contents of the most important files in the project.
 
 ### [`mensable/__init__.py`](mensable/__init__.py)
 
 This is the 'factory' file which identifies the `/mensable` directory as a
-python package, and includes the `create_app` function for creating and
+Python package, and includes the `create_app` function for creating and
 configuring the flask app.
 
 ### [`mensable/auth.py`](mensable/auth.py)
@@ -95,7 +96,7 @@ This directory contains all the HTML template files used for the front end of
 the app. There are too many to describe each in detail here, but the most
 important is `base.html` which encodes the basic features of the site and which
 all the other files extend. The purpose of each of the files can be inferred
-from the filename and from how they are rendered in the python files.
+from the filename and from how they are rendered in the Python files.
 
 ### [`tests/conftest.py`](tests/conftest.py)
 
@@ -115,5 +116,16 @@ These files test the code in `mensable/__init__.py`, `mensable/auth.py`,
 `mensable/api.py` respectively, thereby proving test coverage for the entire
 application (including, implicitly `mensable/models.py`.)
 
-TODO: requirements.txt, setup.py
+### [`requirements.txt`](requirements.txt)
+
+This file contains the names of all the Python modules required for the program to run.
+
+### [`Procfile`](Procfile)
+
+A one-line file containing the command to be issued to the **gunicorn**
+web-hostng service.
+
+## [`setup.py`](setup.py)
+
+This file sets up `mensable` as a Python package.
 
