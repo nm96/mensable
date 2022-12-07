@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block body %}
+<div class="mb-3 text-center">
 <p>
 	Sorry, the correct translation of "{{ word_pair.foreignWord }}" is "{{ word_pair.translation }}".
 </p>
 <p>
 	(You put "{{ answer }}".)
 </p>
-<a autofocus class="btn btn-primary" href="/quiz/{{ table.language.name }}/{{ table.name }}" role="button">Continue</a>
+<a autofocus class="btn btn-primary mb-3" href="/quiz/{{ table.language.name }}/{{ table.name }}" role="button">Continue</a>
+</div>
 {% endblock %}
