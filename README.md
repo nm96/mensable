@@ -32,10 +32,14 @@ spent on the hardest word pairs.
 
 ## Implementation
 
-Mensable is implemented as a **flask** web app written in Python 3. The front end
-consists only of a set of fairly simple HTML files
-([mensable/templates](mensable/templates)) using the Jinja templating engine and relying
-on the Bootstrap framework for styling.
+### Front end
+
+Mensable is implemented as a **flask** web app written in Python 3. The front
+end consists only of a set of fairly simple HTML files
+([mensable/templates](mensable/templates)) using the Jinja templating engine and
+relying on the Bootstrap framework for styling.
+
+### Back end
 
 However, the standout feature of the app is definitely not the front end but the
 system used to model the users, languages, tables, word pairs and table
@@ -45,11 +49,20 @@ some experimentation that the best solution was to use the **SQLAlchemy** Object
 Relational Mapper (ORM) system. This relates the database tables to Python
 classes (defined in [mensable/models.py](mensable/models.py)) which greatly simplified
 many database operations once I had learned the details of the framework.
-(Although admittedly this comes at the cost of an opportunity to learn more
-about basic SQL.)
+
+The diagram below shows the structure of the relationships in the database. The
+relationship of languages to tables and word pairs is one-to-many but I chose to make
+the relationship of tables to word pairs many-to-many to anticipate the likely
+scenario of a word pair being wanted in multiple lists. As indicated in the
+diagram, the object/table with the most columns is `Subscription`, as it stores
+detailed information about a user's progress on a a given table.
+
+![Entity relationship diagram](ERD.png)
 
 The app is hosted using **Heroku** with a **PostgreSQL** database - although it
 was developed using a local **sqlite** database for simplicity.
+
+### Testing
 
 The app is tested using the **pytest** framework, using the scripts contained in
 [tests](/tests). These simulate every operation that user could carry out, and
