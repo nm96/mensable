@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import os
+
 db = SQLAlchemy()
 
 def create_app(test_config=None):
@@ -14,7 +16,7 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
         app.config["SQLALCHEMY_ECHO"] = False
     else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///temp.db"
+        app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
         app.config["SQLALCHEMY_ECHO"] = True
 
     from mensable import auth, api
