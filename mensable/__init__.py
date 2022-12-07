@@ -16,7 +16,10 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
         app.config["SQLALCHEMY_ECHO"] = False
     else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+        uri = os.getenv("DATABASE_URL")
+        if uri.startswith("postgres://"):
+            uri = uri.replace("postgres://", "postgresql://")
+        app.config["SQLALCHEMY_DATABASE_URI"] = uri
         app.config["SQLALCHEMY_ECHO"] = True
 
     from mensable import auth, api
