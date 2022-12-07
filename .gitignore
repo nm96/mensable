@@ -6,3 +6,5 @@ templates/empty.html
 todo.txt
 .coverage
 UNKNOWN.egg-info/
+animaux.csv
+networking_acronyms.csv
