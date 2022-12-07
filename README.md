@@ -57,4 +57,4 @@ main application code.
 
 ## Code structure
 
-
+### [`mensable/__init__.py`](mensable/__init__.py)
