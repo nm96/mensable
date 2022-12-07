@@ -1,8 +1,9 @@
 # MENSABLE 
 
-* This web app was created as a project for the [Harvard CS50x](TODO: add hosted
-web app url here) course. To try it out, visit [mensable.com]() A video
-demonstration of the app is available [here](TODO: add video demo url here). *
+*This web app was created as a project for the [Harvard
+CS50x](https://cs50.harvard.edu/x/2022/) course. To try it out, visit
+[mensable.com](TODO: add hosted web app url here) A video demonstration of the
+app is available [here](TODO: add video demo url here).*
 
 
 ## Introduction
