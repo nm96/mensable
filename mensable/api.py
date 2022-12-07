@@ -14,7 +14,8 @@ bp = Blueprint("api", __name__)
 @bp.route("/")
 @login_required
 def home():
-    """Render homepage"""
+    """Render homepage - including lists of languages and tables a user is
+    subscribed to."""
     user = User.query.filter_by(id=session["user_id"]).first()
     subs = user.subscriptions
     subs.sort(key=lambda sub: sub.last_quiz_date)
@@ -22,6 +23,29 @@ def home():
     today = date.today()
     return render_template("home.html", user=user, subs=subs,
             languages=languages, date=today)
+
+
+@bp.route("/tables")
+@bp.route("/tables/<language_name>")
+@login_required
+def tables(language_name=None):
+    """List all tables, or optionally all tables in a given language"""
+    if not language_name:
+        tables = Table.query.all()
+        return render_template("all_tables.html", tables=tables)
+    else:
+        language = Language.query.filter_by(name=language_name).first()
+        tables = Table.query.filter_by(language_id=language.id)
+        return render_template("tables_in_language.html", tables=tables,
+                language=language)
+
+
+@bp.route("/languages")
+@login_required
+def languages():
+    """List all languages"""
+    languages = Language.query.all()
+    return render_template("languages.html", languages=languages)
 
 
 @bp.route("/create_language", methods=["GET", "POST"])
@@ -112,6 +136,7 @@ def edit_table(language_name, table_name):
 
 
 def add_word_pair(foreignWord, translation, table, language):
+    """Add a word pair to a table"""
     # Strip whitespace
     foreignWord = foreignWord.strip()
     translation = translation.strip()
@@ -205,28 +230,6 @@ def view_table(language_name, table_name):
 
     sub = Subscription.query.filter_by(learner_id=user.id, table_id=table.id).first()
     return render_template("view_table.html", table=table, user=user, sub=sub)
-
-
-@bp.route("/tables")
-@bp.route("/tables/<language_name>")
-@login_required
-def tables(language_name=None):
-    """List all tables, or optionally all tables in a given language"""
-    if not language_name:
-        tables = Table.query.all()
-        return render_template("all_tables.html", tables=tables)
-    else:
-        language = Language.query.filter_by(name=language_name).first()
-        tables = Table.query.filter_by(language_id=language.id)
-        return render_template("tables_in_language.html", tables=tables,
-                language=language)
-
-
-@bp.route("/languages")
-@login_required
-def languages():
-    languages = Language.query.all()
-    return render_template("languages.html", languages=languages)
 
 
 @bp.route("/quiz/<language_name>/<table_name>", methods=["GET", "POST"])
