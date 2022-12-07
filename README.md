@@ -56,8 +56,7 @@ scenario of a word pair being wanted in multiple lists. As indicated in the
 diagram, the object/table with the most columns is `Subscription`, as it stores
 detailed information about a user's progress on a a given table.
 
-![Entity relationship diagram created using Cacoo.com from file
-dataclips_lsyodlxksjgyiqmmfhphgnyfktgr.csv](ERD.png)
+![Entity relationship diagram created using Cacoo.com](ERD.png)
 
 The app is hosted using **Heroku** with a **PostgreSQL** database - although it
 was developed using a local **sqlite** database for simplicity.
