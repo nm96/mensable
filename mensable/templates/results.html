@@ -8,6 +8,8 @@
 <h5>
 	Incorrect:
 </h5>
+
+<div class="container mb-3">
 <table class="table">
 	<tbody>
 		{% for word_pair in results["wrong_list"] %}		
@@ -34,6 +36,7 @@
 	</tbody>
 </table>	
 {% endif %}
+</div>
 
 <div class="mb-3">
 	<a autofocus class="btn btn-primary mb-3" href="/quiz/{{ sub.table.language.name }}/{{ sub.table.name }}" role="button">Continue</a>
