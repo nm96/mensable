@@ -1,6 +1,9 @@
-# MENSABLE (TODO: add hosted web app url here)
+# MENSABLE 
 
-#### Video Demo: (TODO: add video url here)
+* This web app was created as a project for the [Harvard CS50x](TODO: add hosted
+web app url here) course. To try it out, visit [mensable.com]() A video
+demonstration of the app is available [here](TODO: add video demo url here). *
+
 
 ## Introduction
 
@@ -11,7 +14,8 @@ on a flashcard.
 
 Tables are organized into 'languages' and contain 'word pairs'. Users can
 browse, subscribe to and take quizzes on existing word tables as well as
-creating their own.
+creating and editing their own. Tables can be edited via a built-in edit portal
+on the site or by uploading a csv file containing the word pairs.
 
 When a user takes quizzes on a table, mensable uses the [Leitner
 system](https://en.wikipedia.org/wiki/Leitner_system) to keep track of the
@@ -22,4 +26,25 @@ moved along to a higher box when answered correctly in a quiz. Quizzes always
 cover the words in the lowest-ranked boxes, and an incorrect answer for a word
 pair demotes it back to box 0. This system ensures that the maximum time is
 spent on the hardest word pairs.
+
+
+## Implementation
+
+Mensable is implemented as a Flask web app written in Python 3. The front end
+consists only of a set of fairly simple html files
+([templates](mensable/templates)) using the Jinja templating engine and relying
+on the Bootstrap framework for styling.
+
+However, the standout feature of the app is definitely not the front end but the
+system used to model the users, languages, tables, word pairs and table
+subscriptions. I originally intended to use a conventional SQL engine such as
+psycopg or the CS50 SQL module to interact with the database, but decided after
+some experimentation that the best solution was to use the SQLAlchemy Object
+Relational Mapper (ORM) system. This relates the database tables to python
+classes (defined in [models.py](mensable/models.py)) which greatly simplified
+many database operations once I had learned the details of the framework.
+(Although admittedly this comes at the cost of an opportunity to learn more
+about basic SQL.)
+
+TODO: State underlying database type and hosting platform once hosted.
 
