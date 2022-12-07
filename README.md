@@ -57,11 +57,12 @@ main application code.
 
 ## Code structure
 
-The project is divided into the main directory `\mensable` and the
-`\tests` directory, with some configuration files here along with this readme.
-This structure - borrowed from [the flask tutorial](TODO) allows the app to be
-run as a python package, which is useful for testing. Below I have outlined the
-contents of the most important files in the project.
+The project is divided into the main directory `\mensable` and the `\tests`
+directory, with some configuration files here along with this readme. This
+structure - borrowed from [the flask
+tutorial](https://flask.palletsprojects.com/en/2.2.x/tutorial/) allows the app
+to be run as a python package, which is useful for testing. Below I have
+outlined the contents of the most important files in the project.
 
 ### [`mensable/__init__.py`](mensable/__init__.py)
 
@@ -107,9 +108,7 @@ This is an example CSV file used to test the adding of words to a table via CSV
 upload. It contains two valid word pairs and a line of nonsense characters which
 should be rejected by the application.
 
-### [`tests/test_factory.py`](tests/test_factory.py),
-[`tests/test_auth.py`](tests/test_auth.py),
-[`tests/test_api.py`](tests/test_api.py)
+### [`tests/test_factory.py`](tests/test_factory.py), [`tests/test_auth.py`](tests/test_auth.py), [`tests/test_api.py`](tests/test_api.py)
 
 These files test the code in `mensable/__init__.py`, `mensable/auth.py`,
 `mensable/api.py` respectively, thereby proving test coverage for the entire

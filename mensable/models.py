@@ -59,7 +59,6 @@ class Subscription(db.Model):
     subscription_date = db.Column(db.String, default=date.today)
 
     def __init__(self, learner, table):
-        # TODO: Handle potential error here where table.id is not defined.
         self.learner_id = learner.id
         self.table_id = table.id
         self.leitner_boxes = {}

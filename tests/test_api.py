@@ -115,7 +115,8 @@ def test_upload_csv(app, client, auth, api):
     with app.app_context():
         table = Table.query.filter_by(name=api.table_name).first()
         assert len(table.words) == 2
-        # TODO: More thorough / clear testing of csv upload here.
+        word_pair = WordPair.query.filter_by(foreignWord="foo").first()
+        assert word_pair is not None
 
 
 def test_delete_word(app, client, auth, api):
