@@ -33,7 +33,7 @@ spent on the hardest word pairs.
 
 Mensable is implemented as a **flask** web app written in Python 3. The front end
 consists only of a set of fairly simple html files
-([templates](/mensable/templates)) using the Jinja templating engine and relying
+([mensable/templates](mensable/templates)) using the Jinja templating engine and relying
 on the Bootstrap framework for styling.
 
 However, the standout feature of the app is definitely not the front end but the
@@ -42,7 +42,7 @@ subscriptions. I originally intended to use a conventional SQL engine such as
 psycopg or the CS50 SQL module to interact with the database, but decided after
 some experimentation that the best solution was to use the **SQLAlchemy** Object
 Relational Mapper (ORM) system. This relates the database tables to python
-classes (defined in [models.py](/mensable/models.py)) which greatly simplified
+classes (defined in [mensable/models.py](mensable/models.py)) which greatly simplified
 many database operations once I had learned the details of the framework.
 (Although admittedly this comes at the cost of an opportunity to learn more
 about basic SQL.)
@@ -58,3 +58,19 @@ main application code.
 ## Code structure
 
 ### [`mensable/__init__.py`](mensable/__init__.py)
+
+This is the 'factory' file which identifies the `/mensable` directory as a
+python package, and includes the `create_app()` function for creating and
+configuring the flask app.
+
+### [`mensable/auth.py`](mensable/auth.py)
+
+Contains everything necessary for managing user authorisation: the route
+functions `login()`, `logout()`, `register()` and the `login_required()`
+decorator.
+
+### [`mensable/api.py`](mensable/api.py)
+
+
+
+
