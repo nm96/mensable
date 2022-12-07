@@ -1,1 +1,1 @@
-web: gunicorn mensable:create_app()
+web: gunicorn 'mensable:create_app()'
