@@ -3,8 +3,7 @@
 *This web app was created as a project for the [Harvard
 CS50x](https://cs50.harvard.edu/x/2022/) course. To try it out, visit
 [mensable.com](http://mensable.com) and register for an account.
-A video demonstration of the app is available [here](TODO: add video demo url
-here).*
+A video demonstration of the app is available [here](TODO).*
 
 
 ## Introduction
@@ -57,7 +56,8 @@ scenario of a word pair being wanted in multiple lists. As indicated in the
 diagram, the object/table with the most columns is `Subscription`, as it stores
 detailed information about a user's progress on a a given table.
 
-![Entity relationship diagram](ERD.png)
+![Entity relationship diagram created using Cacoo.com from file
+dataclips_lsyodlxksjgyiqmmfhphgnyfktgr.csv](ERD.png)
 
 The app is hosted using **Heroku** with a **PostgreSQL** database - although it
 was developed using a local **sqlite** database for simplicity.
