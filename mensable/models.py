@@ -7,7 +7,7 @@ class User(db.Model):
     """Basic information about user accounts"""
     id = db.Column("id", db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
-    password_hash = db.Column(db.String(100))
+    password_hash = db.Column(db.String)
     tables = db.relationship('Table', backref='creator', lazy=True)
     subscriptions = db.relationship('Subscription', backref='learner',
             lazy=True)
