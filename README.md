@@ -32,7 +32,7 @@ spent on the hardest word pairs.
 ## Implementation
 
 Mensable is implemented as a **flask** web app written in Python 3. The front end
-consists only of a set of fairly simple html files
+consists only of a set of fairly simple HTML files
 ([mensable/templates](mensable/templates)) using the Jinja templating engine and relying
 on the Bootstrap framework for styling.
 
@@ -57,20 +57,63 @@ main application code.
 
 ## Code structure
 
+The project is divided into the main directory `\mensable` and the
+`\tests` directory, with some configuration files here along with this readme.
+This structure - borrowed from [the flask tutorial](TODO) allows the app to be
+run as a python package, which is useful for testing. Below I have outlined the
+contents of the most important files in the project.
+
 ### [`mensable/__init__.py`](mensable/__init__.py)
 
 This is the 'factory' file which identifies the `/mensable` directory as a
-python package, and includes the `create_app()` function for creating and
+python package, and includes the `create_app` function for creating and
 configuring the flask app.
 
 ### [`mensable/auth.py`](mensable/auth.py)
 
 Contains everything necessary for managing user authorisation: the route
-functions `login()`, `logout()`, `register()` and the `login_required()`
+functions `login`, `logout`, `register` and the `login_required`
 decorator.
 
 ### [`mensable/api.py`](mensable/api.py)
 
+The API file contains route functions for all of mensable's core functionality:
+creating, viewing, editing and deleting languages, tables and word pairs, along
+with running quizzes, displaying and saving their results.
 
+### [`mensable/models.py`](mensable/models.py)
 
+Here the model classes `User`, `Language`, `Subscription`, `Table` and
+`WordPair` are defined, along with an auxiliary database table `table_word_pair`
+which tracks the many-to-many relationship between Tables and WordPairs.
+
+### [`mensable/templates/`](mensable/templates/)
+
+This directory contains all the HTML template files used for the front end of
+the app. There are too many to describe each in detail here, but the most
+important is `base.html` which encodes the basic features of the site and which
+all the other files extend. The purpose of each of the files can be inferred
+from the filename and from how they are rendered in the python files.
+
+### [`tests/conftest.py`](tests/conftest.py)
+
+Here we define several pytest *fixtures* which are special functions used to
+configure and simplify testing, by e.g. setting up a 'dummy' flask app and
+logging in a test user.
+
+### [`tests/test_table.csv`](tests/test_table.csv)
+
+This is an example CSV file used to test the adding of words to a table via CSV
+upload. It contains two valid word pairs and a line of nonsense characters which
+should be rejected by the application.
+
+### [`tests/test_factory.py`](tests/test_factory.py),
+[`tests/test_auth.py`](tests/test_auth.py),
+[`tests/test_api.py`](tests/test_api.py)
+
+These files test the code in `mensable/__init__.py`, `mensable/auth.py`,
+`mensable/api.py` respectively, thereby proving test coverage for the entire
+application (including, implicitly `mensable/models.py`.)
+
+TODO: requirements.txt, setup.py
 

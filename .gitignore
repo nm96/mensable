@@ -8,3 +8,4 @@ todo.txt
 UNKNOWN.egg-info/
 animaux.csv
 networking_acronyms.csv
+mensable/templates/empty.html
