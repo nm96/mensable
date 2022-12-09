@@ -2,11 +2,16 @@
 
 {% block body %}
     <form action="/login" method="post">
-        <div class="mb-3 text-center">
+        <div class="container-fluid mb-3 text-center">
+			<h5 class="mb-3">
+				Welcome to mensable, your home for learning.
+			</h5>
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text" required>
             <input autocomplete="off" class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" required>
 			<br>
-        	<button class="btn btn-primary" type="submit">Log In</button>
+        	<button class="btn btn-primary mb-3" type="submit">Log In</button>
+			<br>
+        	<a class="btn btn-info mb-3" href="/register" role="button">Register</a>
         </div>
     </form>
 {% endblock %}
