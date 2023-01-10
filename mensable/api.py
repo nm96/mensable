@@ -4,6 +4,7 @@ import csv
 import Levenshtein
 import sys
 from datetime import date
+from random import shuffle
 
 from mensable.models import *
 from mensable.auth import login_required
@@ -273,6 +274,7 @@ def quiz(language_name, table_name):
             word_ids = list(lboxes.keys())
             word_ids.sort(key=lambda id: lboxes[id])
             word_ids = word_ids[:QUIZ_LENGTH]
+            shuffle(word_ids)
             quiz["total_count"] = len(word_ids)
             quiz["word_ids"] = word_ids
             quiz["to_test"] = word_ids.copy()
