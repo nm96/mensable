@@ -159,7 +159,7 @@ def add_word_pair(foreignWord, translation, table, language):
     word_pair = WordPair(foreignWord, translation)
     word_pair.language_id = language.id
     db.session.add(word_pair)
-    table.words.append(word_pair)   # Maintain many-to-many relationship.
+    table.words.insert(0, word_pair)   # Maintain many-to-many relationship.
     db.session.commit()
     return
 
