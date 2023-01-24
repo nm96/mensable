@@ -151,7 +151,7 @@ def add_word_pair(foreignWord, translation, table, language):
     existing = WordPair.query.filter_by(foreignWord=foreignWord).first()
     if existing and existing.language_id == language.id:
         flash(f"{foreignWord} is already in the database.")
-        table.words.append(existing)
+        table.words.insert(0, existing)
         db.session.commit()
         return
 
