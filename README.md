@@ -2,8 +2,9 @@
 
 *This web app was created as a project for the [Harvard
 CS50x](https://cs50.harvard.edu/x/2022/) course. To try it out, visit
-[mensable.com](http://mensable.herokuapp.com) and register for an account.
-A video demonstration of the app is available [here](https://youtu.be/ZGV6GLZNr5E).*
+[mensable.herokuapp.com](http://mensable.herokuapp.com) and register for an
+account. A video demonstration of the app is available
+[here](https://youtu.be/ZGV6GLZNr5E).*
 
 
 ## Introduction
